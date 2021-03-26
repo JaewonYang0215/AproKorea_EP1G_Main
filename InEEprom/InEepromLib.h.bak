@@ -1,0 +1,9 @@
+#ifndef   __INEEPROM_HEADER
+#define   __INEEPROM_HEADER                 
+
+#include "UserDefine.h"
+
+char getchar1( void );
+void putchar1( char c );
+
+#endif;       

@@ -1,0 +1,247 @@
+#ifndef   __IPC_HEADER
+#define   __IPC_HEADER                 
+
+#include "../UserDefine.h"
+
+typedef enum
+{
+     VA_SYSTEM = 0, 
+     VA_MAP ,
+     VA_MUTE,
+     VA_LEVEL,
+     VA_VOLUME,
+     VA_DELAY,
+     VA_INPUT,
+     VA_FILTER,   
+     VA_SUBCOMMAND,
+     VA_PRESET,
+     VA_HIGHLOW,
+     VA_XFILTER,   
+     VA_PHASE,
+     VA_EQFLAG,
+     VA_XOVERFLAG,
+     VA_VEQFLAG,
+     VA_VEQFILTER,
+     VA_PASSWORD,
+     VA_VEQVSEL,
+     VA_VEQLED, 
+     //
+     VA_OK     =  0x80,
+     VA_ERROR,
+     VA_SNERROR
+
+} IPC_COMMAND;   
+
+typedef enum
+{
+     CH1 = 0, 
+     CH2, 
+     CH3, 
+     CH4, 
+     CH5, 
+     CH6, 
+     CH7, 
+     CH8, 
+     MAIN
+
+} IPC_CHANNEL;    
+     
+typedef enum
+{
+     SUB_STOP=0,
+     SUB_START,
+     SUB_RESTART,
+     SUB_UPDATE  
+  
+} IPC_SUBCOMMAND;    
+               
+typedef struct _IPC_HEADER
+{
+   BYTE Addr;
+   BYTE IPC_ID;
+   BYTE Mode;
+   BYTE SeqNum;
+   BYTE Channel;
+   BYTE Biquid;
+   BYTE BodyLength;
+   WORD CRC; 
+} *LPIPC_HEADER, IPC_HEADER;    
+
+typedef struct _BODY_COMPANY
+{
+     BYTE Addr;
+     BYTE IPC_ID;     
+     BYTE Com[3];
+     WORD CRC;
+} *LPBODY_COMPANY, BODY_COMPANY;      
+                                            
+typedef struct _BODY_MAP
+{
+   BYTE Addr;   
+   BYTE IPC_ID;
+   BYTE MapM;
+   BYTE MapA;
+   BYTE MapD;
+   WORD CRC;
+} *LPBODY_MAP, BODY_MAP; 
+
+typedef struct _BODY_HIGHLOW
+{
+   BYTE Addr;   
+   BYTE IPC_ID;
+   BYTE HighLow;
+   WORD CRC;
+} *LPBODY_HIGHLOW, BODY_HIGHLOW; 
+
+typedef struct _BODY_PHASE
+{
+   BYTE Addr;   
+   BYTE IPC_ID;
+   BYTE SumFlag; 
+   BYTE Phase;
+   WORD CRC;
+} *LPBODY_PHASE, BODY_PHASE; 
+
+typedef struct _BODY_EQFLAG
+{
+   BYTE Addr;   
+   BYTE IPC_ID;
+   BYTE SumFlag;
+   BYTE EqFlag;
+   WORD CRC;
+} *LPBODY_EQFLAG, BODY_EQFLAG; 
+
+typedef struct _BODY_VEQFLAG
+{
+   BYTE Addr;   
+   BYTE IPC_ID;
+   BYTE SumFlag;
+   BYTE VeqFlag;
+   WORD CRC;
+} *LPBODY_VEQFLAG, BODY_VEQFLAG;
+
+typedef struct _BODY_XOVERFLAG
+{
+   BYTE Addr;   
+   BYTE IPC_ID;
+   BYTE SumFlag;
+   BYTE XoverFlag;
+   WORD CRC;
+} *LPBODY_XOVERFLAG, BODY_XOVERFLAG; 
+
+typedef struct _BODY_PASSWORD
+{              
+   BYTE Addr;
+   BYTE IPC_ID;
+   BYTE PWord[10];
+   WORD CRC;
+} *LPBODY_PASSWORD, BODY_PASSWORD;             
+
+
+typedef struct _BODY_MUTE
+{                    
+     BYTE Addr;
+     BYTE IPC_ID;
+     BYTE Value1;
+     BYTE Value2;
+     WORD CRC;
+} *LPBODY_MUTE, BODY_MUTE;                 
+     
+typedef struct _BODY_VOLUME
+{                    
+     BYTE Addr;
+     BYTE IPC_ID;
+     BYTE SumFlag;
+     BYTE Value;
+     WORD CRC;
+} *LPBODY_VOLUME, BODY_VOLUME;             
+                
+typedef struct _BODY_DELAY
+{
+   BYTE Addr;
+   BYTE IPC_ID;
+   WORD Value1;
+   WORD Value2;
+   WORD CRC;
+} *LPBODY_DELAY, BODY_DELAY;      
+       
+
+typedef struct _BODY_INPUT
+{
+     BYTE Addr;
+     BYTE IPC_ID;
+     BYTE VALUE;
+     WORD CRC;
+} *LPBODY_INPUT, BODY_INPUT;        
+
+typedef struct _BODY_VEQVSEL
+{
+     BYTE Addr;
+     BYTE IPC_ID;
+     BYTE VALUE;
+     WORD CRC;
+} *LPBODY_VEQVSEL, BODY_VEQVSEL;  
+
+typedef struct _BODY_VEQLED
+{
+     BYTE Addr;
+     BYTE IPC_ID;
+     BYTE VALUE;
+     WORD CRC;
+} *LPBODY_VEQLED, BODY_VEQLED;  
+         
+
+typedef struct _BODY_FILTER
+{                         
+     BYTE Addr;
+     BYTE IPC_ID;
+     BYTE SumFlag;
+     BYTE VALUE[8];
+     WORD CRC;
+} *LPBODY_FILTER, BODY_FILTER;         
+
+                          
+typedef struct _BODY_SUBCOMMAND
+{                         
+     BYTE Addr;
+     BYTE IPC_ID;
+     BYTE TYPE;
+     BYTE FLAG;     
+     WORD CRC;
+} *LPBODY_SUBCOMMAND, BODY_SUBCOMMAND;  
+
+
+typedef struct _BODY_PRESET
+{                         
+     BYTE Addr;
+     BYTE IPC_ID;
+     BYTE Preset;
+     WORD CRC;
+} *LPBODY_PRESET, BODY_PRESET;    
+
+typedef struct _BODY_LEVEL
+{
+   BYTE Addr;
+   BYTE IPC_ID;
+   BYTE Atten1;
+   BYTE Value1;
+   BYTE Atten2;
+   BYTE Value2;
+   WORD CRC;
+} *LPBODY_LEVEL, BODY_LEVEL;   
+
+
+typedef struct _BODY_SYSTEM
+{
+   BYTE  Addr;
+   BYTE  IPC_ID;
+   WORD  Year;
+   BYTE  Month;
+   BYTE  SystemType;
+   WORD  CRC;
+} *LPBODY_SYSTEM, BODY_SYSTEM; 
+                          
+void IPC_RunProcess( void );
+WORD MakeCrc( BYTE *Data, int Len );            
+
+#endif       

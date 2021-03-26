@@ -1,0 +1,95 @@
+RAM Allocation [bytes]
+Variable                                                                          Address   Size
+------------------------------------------------------------------------------------------------
+gExtTemp                                                                          0x0500       2
+gVoltage                                                                          0x0502       2
+gCurrent                                                                          0x0504       2
+gCurTemp                                                                          0x0506       2
+goldTime1ms                                                                       0x0508       2
+gTime1ms                                                                          0x050A       2
+gIntTemp                                                                          0x050C       2
+gPlateVol                                                                         0x050E       2
+gHeatSinkVol                                                                      0x0510       2
+gRefCur                                                                           0x0512       2
+gRefVol                                                                           0x0514       2
+gRefTemp                                                                          0x0516       2
+gMode                                                                             0x0518       2
+gRunFlag                                                                          0x051A       2
+gLevel                                                                            0x051C       2
+IPCRcvfun                                                                         0x051E      24
+IPCSndfun                                                                         0x0536      24
+rx_buffer1                                                                        0x054E     250
+_seed                                                                             0x0648       4
+
+EEPROM Allocation [bytes]
+Variable                                                                          Address   Size
+------------------------------------------------------------------------------------------------
+
+Register Allocation
+Variable                                                                          Register  Size
+------------------------------------------------------------------------------------------------
+gOldUartTime1ms                                                                   R4,R5        2
+rx_wr_index1                                                                      R7           1
+rx_rd_index1                                                                      R6           1
+rx_counter1                                                                       R9           1
+rx_buffer_overflow1                                                               R8           1
+mRcvErrFlag                                                                       R11          1
+gAD_Channel                                                                       R10          1
+
+FLASH Allocation [words]
+Function                                                                          Address   Size
+------------------------------------------------------------------------------------------------
+I2C_Write                                                                         0x000B1     28
+i2c_delay                                                                         0x000CD      2
+I2C_Ack                                                                           0x000CF     17
+I2C_Start                                                                         0x000E0      7
+I2C_Stop                                                                          0x000E7      7
+I2C_ShiftOut                                                                      0x000EE     28
+I2C_ShiftIn                                                                       0x0010A     28
+TCN75_init                                                                        0x00126      9
+TCN75_Read                                                                        0x0012F     67
+DAC7611_init                                                                      0x00172      4
+DAC7611_WriteVoltage                                                              0x00176     27
+DAC7611_Write                                                                     0x00191     46
+ADS1248_init                                                                      0x001BF     19
+AD_ReadExTTemp                                                                    0x001D2     93
+AD_ReadVoltage                                                                    0x0022F     10
+AD_ReadCurrent                                                                    0x00239     17
+ADS1248_ChangeChannel                                                             0x0024A     15
+ADS1248_StopReadCommand                                                           0x00259      7
+ADS1248_WriteRegByte                                                              0x00260     16
+ADS1248_ADConvertData                                                             0x00270     49
+ADS1248ResetCommand                                                               0x002A1      7
+ADS1248_ReadByte                                                                  0x002A8      9
+ADS1248_WriteByte                                                                 0x002B1      7
+IPC_RCV_MODE                                                                      0x002B8      3
+IPC_RCV_RUN                                                                       0x002BB     35
+IPC_RCV_LEVEL                                                                     0x002DE     29
+IPC_RCV_VOLTAGE                                                                   0x002FB      3
+IPC_RCV_CURRENT                                                                   0x002FE      3
+IPC_RCV_TEMP_INT                                                                  0x00301      3
+IPC_RCV_TEMP_EXT                                                                  0x00304      3
+IPC_RCV_PLATE                                                                     0x00307      3
+IPC_RCV_HEATSINK                                                                  0x0030A      3
+IPC_RCV_REF_VOL                                                                   0x0030D     19
+IPC_RCV_REF_CUR                                                                   0x00320     21
+IPC_RCV_REF_TEMP                                                                  0x00335     19
+IPC_SND_REF_TEMP                                                                  0x003D9     31
+MakeCrc                                                                           0x003F8     27
+IPC_RunProcess                                                                    0x00413     54
+IPC_Send_Response                                                                 0x00449     34
+IPC_RcvProcess                                                                    0x0046B     37
+IPC_SndProcess                                                                    0x00490     30
+usart1_rx_isr                                                                     0x004AE     41
+IPC_Get_RxCount1                                                                  0x004F1      2
+IPC_ResetCount1                                                                   0x004F3      6
+Tputchar                                                                          0x004F9     10
+IPC_RcvData_Interrupt                                                             0x00503     43
+IPC_SendData                                                                      0x0052E     22
+read_adc                                                                          0x00544     38
+timer0_ovf_isr                                                                    0x0056A     22
+PortInit                                                                          0x00580     62
+SystemInit                                                                        0x005BE     65
+ADCProcessor                                                                      0x005FF     42
+WaitEvent                                                                         0x00629     33
+main                                                                              0x0064A     38

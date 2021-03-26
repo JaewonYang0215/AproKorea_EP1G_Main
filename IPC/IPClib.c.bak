@@ -1,0 +1,1341 @@
+#include <ina90.h>
+#include <stdio.h>
+#include "IPCLib.h"
+#include <string.h>
+#include <ioavr.h>
+#include "../Uart/Uartlib.h"        
+#include "../Tpa5050/Tpa5050lib.h"
+#include "../InEEprom/InEepromLib.h" 
+#include  "../DDX8001/DDX8001Lib.h"
+#include "../FilterCoef/FilterCoef.h"
+#include "../I2CLib/I2CLIb.h"
+#include "../BD3812/BD3812lib.h"
+#include "../CS4271Lib/cs4271lib.h"
+#include  "../AD5248Lib/AD5248Lib.h"   
+
+#define IPC_MODE_READ           0x80
+#define IPC_MODE_WRITE_DDX      0x01
+#define IPC_MODE_WRITE_EEPROM   0x02
+#define IPC_MODE_WRITE_ALL      0x03
+#define IPC_VERSION             0x01
+#define IPC_DEBUG_MODE           2
+                                    
+extern WORD gTime1ms;          
+extern BYTE S_Address;
+extern BYTE gPreset;
+extern BYTE gInputSel;
+extern FILTERCOEF gVeqCoef[];   
+extern BYTE  gVeqFlag[];
+//extern BYTE  gPhaseFlag[];
+   
+#ifdef VISUAL_DEBUG
+BYTE Dbgtemp[100];                  
+#endif
+
+extern void Run_Eeprom_to_DDX( void );
+
+BOOL MasterMutFlag = FALSE;
+         
+BYTE IPC_RCV_SYSTEM( LPIPC_HEADER pHead,BYTE *Data );
+BYTE IPC_RCV_SUBCOMMAND(LPIPC_HEADER pHead, BYTE *Data );
+BYTE IPC_RCV_MAP( LPIPC_HEADER pHead,BYTE *Data );
+BYTE IPC_RCV_MUTE( LPIPC_HEADER pHead,BYTE *Data );
+BYTE IPC_RCV_VOLUME( LPIPC_HEADER pHead,BYTE *Data );
+BYTE IPC_RCV_DELAY( LPIPC_HEADER pHead,BYTE *Data );
+BYTE IPC_RCV_INPUT( LPIPC_HEADER pHead,BYTE *Data );
+BYTE IPC_RCV_FILTER( LPIPC_HEADER pHead,BYTE *Data );
+BYTE IPC_RCV_LEVEL( LPIPC_HEADER pHead,BYTE *Data );
+BYTE IPC_RCV_PRESET( LPIPC_HEADER pHead,BYTE *Data );
+BYTE IPC_RCV_HIGHLOW( LPIPC_HEADER pHead,BYTE *Data );
+BYTE IPC_RCV_XFILTER( LPIPC_HEADER pHead,BYTE *Data );
+BYTE IPC_RCV_PHASE( LPIPC_HEADER pHead,BYTE *Data );
+BYTE IPC_RCV_EQFLAG( LPIPC_HEADER pHead,BYTE *Data );
+BYTE IPC_RCV_XOVERFLAG( LPIPC_HEADER pHead,BYTE *Data );
+BYTE IPC_RCV_VEQFLAG( LPIPC_HEADER pHead,BYTE *Data );
+BYTE IPC_RCV_VEQFILTER( LPIPC_HEADER pHead,BYTE *Data );
+BYTE IPC_RCV_PASSWORD( LPIPC_HEADER pHead,BYTE *Data );
+BYTE IPC_RCV_VEQVSEL( LPIPC_HEADER pHead,BYTE *Data );
+BYTE IPC_RCV_VEQLED( LPIPC_HEADER pHead,BYTE *Data );
+
+typedef BYTE(*RunFun) (LPIPC_HEADER pHead, BYTE *Data);       
+     
+RunFun IPCRcvfun[]=
+{
+     IPC_RCV_SYSTEM,
+     IPC_RCV_MAP,	
+     IPC_RCV_MUTE,	
+     IPC_RCV_LEVEL,    
+     IPC_RCV_VOLUME,  
+     IPC_RCV_DELAY,	   
+     IPC_RCV_INPUT,  
+     IPC_RCV_FILTER,
+     IPC_RCV_SUBCOMMAND,
+     IPC_RCV_PRESET,
+     IPC_RCV_HIGHLOW,
+     IPC_RCV_XFILTER,
+     IPC_RCV_PHASE,
+     IPC_RCV_EQFLAG,
+     IPC_RCV_XOVERFLAG,
+     IPC_RCV_VEQFLAG,
+     IPC_RCV_VEQFILTER,
+     IPC_RCV_PASSWORD,
+     IPC_RCV_VEQVSEL,
+     IPC_RCV_VEQLED
+       
+};                  
+
+//BYTE IPC_SND_ERROR( LPIPC_HEADER pHead );
+BYTE IPC_SND_SYSTEM( LPIPC_HEADER pHead );      
+BYTE IPC_SND_MAP( LPIPC_HEADER pHead );
+BYTE IPC_SND_MUTE( LPIPC_HEADER pHead );
+BYTE IPC_SND_LEVEL( LPIPC_HEADER pHead );
+BYTE IPC_SND_VOLUME( LPIPC_HEADER pHead );
+BYTE IPC_SND_DELAY( LPIPC_HEADER pHead );
+BYTE IPC_SND_INPUT( LPIPC_HEADER pHead );
+BYTE IPC_SND_FILTER( LPIPC_HEADER pHead);
+BYTE IPC_SND_SUBCOMMAND( LPIPC_HEADER pHead); 
+BYTE IPC_SND_PRESET( LPIPC_HEADER pHead);
+BYTE IPC_SND_HIGHLOW( LPIPC_HEADER pHead);
+BYTE IPC_SND_XFILTER(LPIPC_HEADER pHead);
+BYTE IPC_SND_PHASE(LPIPC_HEADER pHead);
+BYTE IPC_SND_EQFLAG(LPIPC_HEADER pHead);
+BYTE IPC_SND_XOVERFLAG(LPIPC_HEADER pHead);
+BYTE IPC_SND_VEQFLAG( LPIPC_HEADER pHead);
+BYTE IPC_SND_VEQFILTER( LPIPC_HEADER pHead );
+BYTE IPC_SND_PASSWORD(LPIPC_HEADER pHead );
+BYTE IPC_SND_VEQVSEL( LPIPC_HEADER pHead );
+BYTE IPC_SND_VEQLED( LPIPC_HEADER pHead );
+
+typedef BYTE(*SenFun) (LPIPC_HEADER pHead);    
+       
+SenFun IPCSndfun[]=
+{                                 
+     IPC_SND_SYSTEM,   
+     IPC_SND_MAP,	
+     IPC_SND_MUTE,	
+     IPC_SND_LEVEL,      
+     IPC_SND_VOLUME,  
+     IPC_SND_DELAY,	   
+     IPC_SND_INPUT,  
+     IPC_SND_FILTER,
+     IPC_SND_SUBCOMMAND, 
+     IPC_SND_PRESET,
+     IPC_SND_HIGHLOW,
+     IPC_SND_XFILTER,
+     IPC_SND_PHASE,
+     IPC_SND_EQFLAG,
+     IPC_SND_XOVERFLAG,
+     IPC_SND_VEQFLAG,
+     IPC_SND_VEQFILTER,
+     IPC_SND_PASSWORD,
+     IPC_SND_VEQVSEL,
+     IPC_SND_VEQLED
+};                
+
+flash WORD crc16_table[256] =
+{
+    0x0000, 0x1189, 0x2312, 0x329b, 0x4624, 0x57ad, 0x6536, 0x74bf, 
+    0x8c48, 0x9dc1, 0xaf5a, 0xbed3, 0xca6c, 0xdbe5, 0xe97e, 0xf8f7, 
+    0x1081, 0x0108, 0x3393, 0x221a, 0x56a5, 0x472c, 0x75b7, 0x643e, 
+    0x9cc9, 0x8d40, 0xbfdb, 0xae52, 0xdaed, 0xcb64, 0xf9ff, 0xe876, 
+    0x2102, 0x308b, 0x0210, 0x1399, 0x6726, 0x76af, 0x4434, 0x55bd, 
+    0xad4a, 0xbcc3, 0x8e58, 0x9fd1, 0xeb6e, 0xfae7, 0xc87c, 0xd9f5, 
+    0x3183, 0x200a, 0x1291, 0x0318, 0x77a7, 0x662e, 0x54b5, 0x453c, 
+    0xbdcb, 0xac42, 0x9ed9, 0x8f50, 0xfbef, 0xea66, 0xd8fd, 0xc974, 
+    0x4204, 0x538d, 0x6116, 0x709f, 0x0420, 0x15a9, 0x2732, 0x36bb, 
+    0xce4c, 0xdfc5, 0xed5e, 0xfcd7, 0x8868, 0x99e1, 0xab7a, 0xbaf3, 
+    0x5285, 0x430c, 0x7197, 0x601e, 0x14a1, 0x0528, 0x37b3, 0x263a, 
+    0xdecd, 0xcf44, 0xfddf, 0xec56, 0x98e9, 0x8960, 0xbbfb, 0xaa72, 
+    0x6306, 0x728f, 0x4014, 0x519d, 0x2522, 0x34ab, 0x0630, 0x17b9, 
+    0xef4e, 0xfec7, 0xcc5c, 0xddd5, 0xa96a, 0xb8e3, 0x8a78, 0x9bf1, 
+    0x7387, 0x620e, 0x5095, 0x411c, 0x35a3, 0x242a, 0x16b1, 0x0738, 
+    0xffcf, 0xee46, 0xdcdd, 0xcd54, 0xb9eb, 0xa862, 0x9af9, 0x8b70, 
+    0x8408, 0x9581, 0xa71a, 0xb693, 0xc22c, 0xd3a5, 0xe13e, 0xf0b7, 
+    0x0840, 0x19c9, 0x2b52, 0x3adb, 0x4e64, 0x5fed, 0x6d76, 0x7cff, 
+    0x9489, 0x8500, 0xb79b, 0xa612, 0xd2ad, 0xc324, 0xf1bf, 0xe036, 
+    0x18c1, 0x0948, 0x3bd3, 0x2a5a, 0x5ee5, 0x4f6c, 0x7df7, 0x6c7e, 
+    0xa50a, 0xb483, 0x8618, 0x9791, 0xe32e, 0xf2a7, 0xc03c, 0xd1b5, 
+    0x2942, 0x38cb, 0x0a50, 0x1bd9, 0x6f66, 0x7eef, 0x4c74, 0x5dfd, 
+    0xb58b, 0xa402, 0x9699, 0x8710, 0xf3af, 0xe226, 0xd0bd, 0xc134, 
+    0x39c3, 0x284a, 0x1ad1, 0x0b58, 0x7fe7, 0x6e6e, 0x5cf5, 0x4d7c, 
+    0xc60c, 0xd785, 0xe51e, 0xf497, 0x8028, 0x91a1, 0xa33a, 0xb2b3, 
+    0x4a44, 0x5bcd, 0x6956, 0x78df, 0x0c60, 0x1de9, 0x2f72, 0x3efb, 
+    0xd68d, 0xc704, 0xf59f, 0xe416, 0x90a9, 0x8120, 0xb3bb, 0xa232, 
+    0x5ac5, 0x4b4c, 0x79d7, 0x685e, 0x1ce1, 0x0d68, 0x3ff3, 0x2e7a, 
+    0xe70e, 0xf687, 0xc41c, 0xd595, 0xa12a, 0xb0a3, 0x8238, 0x93b1, 
+    0x6b46, 0x7acf, 0x4854, 0x59dd, 0x2d62, 0x3ceb, 0x0e70, 0x1ff9, 
+    0xf78f, 0xe606, 0xd49d, 0xc514, 0xb1ab, 0xa022, 0x92b9, 0x8330, 
+    0x7bc7, 0x6a4e, 0x58d5, 0x495c, 0x3de3, 0x2c6a, 0x1ef1, 0x0f78
+};
+
+//**** CRC16 ÂüÁ¶ Code **** 
+#define crc_fcs(fcs,c)  (((fcs) >> 8) ^ crc16_table[((fcs) ^ (c)) & 0xff])
+WORD crc_calc( WORD fcs, BYTE  *buf, int len)
+{
+      WORD fcs_val = fcs;
+      if(len <= 0) return 0;
+      while (len--)  fcs_val = crc_fcs(fcs_val, *buf++);
+      return fcs_val;
+}
+
+WORD MakeCrc( BYTE *Data, int Len )
+{
+     WORD CRC;                    
+     CRC = crc_calc( 2014, Data, Len );              
+ 
+     return CRC;
+}
+
+void IPC_Send_Response( BYTE *Data, BYTE Res )
+{                
+     LPIPC_HEADER mLpHead;
+                              
+     mLpHead = (LPIPC_HEADER)Data;
+     
+     mLpHead->SeqNum++;
+     mLpHead->IPC_ID     = Res;
+     mLpHead->BodyLength = 0;
+     mLpHead->CRC = MakeCrc( (BYTE *)mLpHead , sizeof( IPC_HEADER )-sizeof(WORD) );
+                                  
+     IPC_SendData( Data, sizeof( IPC_HEADER ) );
+}
+
+BYTE IPC_RCV_XOVERFLAG( LPIPC_HEADER pHead, BYTE *Data )
+{
+      int Channel; 
+      LPBODY_XOVERFLAG mFlag;
+ 
+      Channel = pHead->Channel;
+      if( Channel > 7 ) Channel = 7;
+
+      mFlag = ( LPBODY_XOVERFLAG ) Data;      
+      if( pHead->Mode &0x01 )   // DDX
+      {
+          if( mFlag->XoverFlag == 0 )
+          {
+             Xover_SetXOverByPassMode(Channel );
+             if( mFlag->SumFlag)
+                Xover_SetXOverByPassMode(Channel+1 );
+          }
+      }
+      if(  pHead->Mode &0x02 )   // EEPROM 
+      {
+         E2pWriteXoverFlag( Channel , mFlag->XoverFlag);
+         if( mFlag->SumFlag)
+            E2pWriteXoverFlag( Channel+1 , mFlag->XoverFlag);
+      }
+      return TRUE;      
+}
+
+BYTE IPC_RCV_VEQFLAG( LPIPC_HEADER pHead,BYTE *Data )
+{
+      int Channel; 
+      LPBODY_VEQFLAG mFlag;
+ 
+      Channel = pHead->Channel;
+      if( Channel > 7 ) Channel = 7;
+
+      mFlag = ( LPBODY_VEQFLAG ) Data;      
+      if( pHead->Mode &0x01 )   // DDX
+      {
+          gVeqFlag[Channel] = mFlag->VeqFlag;
+          if( mFlag->SumFlag)
+             gVeqFlag[Channel+1] = mFlag->VeqFlag;
+      }
+      if(  pHead->Mode &0x02 )   // EEPROM 
+      {
+         E2pWriteVeqFlag( Channel , mFlag->VeqFlag);
+         if( mFlag->SumFlag)
+            E2pWriteVeqFlag( Channel+1 , mFlag->VeqFlag);
+      }
+      return TRUE;  
+}
+
+BYTE IPC_RCV_EQFLAG( LPIPC_HEADER pHead, BYTE *Data )
+{
+      int Channel; 
+      LPBODY_EQFLAG mFlag;
+ 
+      Channel = pHead->Channel;
+      if( Channel > 7 ) Channel = 7;
+
+      mFlag = ( LPBODY_EQFLAG ) Data;      
+      if( pHead->Mode &0x01 )   // DDX
+      {
+           DDX8001_SetEqByPassMode( Channel, mFlag->EqFlag );
+           if( mFlag->SumFlag)
+             DDX8001_SetEqByPassMode( Channel+1, mFlag->EqFlag );
+      }
+      if(  pHead->Mode &0x02 )   // EEPROM 
+      {
+         E2pWriteEqFlag( Channel , mFlag->EqFlag);
+         if( mFlag->SumFlag)
+            E2pWriteEqFlag( Channel+1 , mFlag->EqFlag);
+
+      }
+      return TRUE;      
+
+}
+BYTE IPC_RCV_PHASE( LPIPC_HEADER pHead,BYTE *Data )
+{
+      int Channel; 
+      LPBODY_PHASE mPhase;
+ 
+      Channel = pHead->Channel;
+      if( Channel > 7 ) Channel = 7;
+   
+      mPhase = ( LPBODY_PHASE ) Data;      
+      if( pHead->Mode &0x01 )   // DDX
+      {       
+           AD5284PHASE_WriteChannel( Channel, mPhase->Phase );                 
+           if( mPhase->SumFlag)
+             AD5284PHASE_WriteChannel( Channel+1, mPhase->Phase );
+      
+      }
+
+      if(  pHead->Mode &0x02 )   // EEPROM 
+      {
+          E2pWritePhase( Channel, mPhase->Phase );
+          if( mPhase->SumFlag)
+              E2pWritePhase( Channel+1, mPhase->Phase );
+      }
+ 
+      return TRUE;      
+}
+
+BYTE IPC_RCV_VEQVSEL( LPIPC_HEADER pHead,BYTE *Data )
+{ 
+      LPBODY_VEQVSEL mVeqSel;
+ 
+      mVeqSel = (LPBODY_VEQVSEL) Data;      
+ 
+      if( pHead->Mode &0x01 )   // DDX
+      {
+          VEQ_Write(  mVeqSel->VALUE, mVeqSel->VALUE );
+      }
+      if(  pHead->Mode &0x02 )   // EEPROM 
+      {
+          E2pWriteVeqVoltage( mVeqSel->VALUE );      
+      }
+      return TRUE;
+}
+
+BYTE IPC_RCV_VEQLED( LPIPC_HEADER pHead,BYTE *Data )
+{
+      
+    return TRUE;
+}
+
+BYTE IPC_RCV_HIGHLOW( LPIPC_HEADER pHead, BYTE *Data )
+{
+      int Channel; 
+      LPBODY_HIGHLOW mHighLowt;
+ 
+      mHighLowt = ( LPBODY_HIGHLOW) Data;      
+      Channel = pHead->Channel;
+      if( Channel > 7 ) Channel = 7;
+ 
+      if( pHead->Mode &0x01 )   // DDX
+      {
+         if( mHighLowt->HighLow) 
+              LOW_HIGHINPUT;
+         else HIGH_HIGHINPUT;      
+      }
+      if(  pHead->Mode &0x02 )   // EEPROM 
+      {
+          E2pWriteHighLow( mHighLowt->HighLow );      
+      }
+      return TRUE;
+}
+
+BYTE IPC_RCV_PRESET( LPIPC_HEADER pHead, BYTE *Data )
+{                        
+      LPBODY_PRESET mPreset;
+                                      
+      mPreset = ( LPBODY_PRESET) Data;      
+      if( pHead->Mode &0x01 )   // DDX
+      {
+         gPreset = mPreset->Preset;
+      }      
+      if(  pHead->Mode &0x02 )   // EEPROM 
+      {
+          E2pWritePreset( mPreset->Preset );      
+      }
+      return TRUE;
+}        
+
+BYTE IPC_RCV_SUBCOMMAND( LPIPC_HEADER pHead, BYTE *Data )
+{                        
+      LPBODY_SUBCOMMAND mCom;
+                                      
+      mCom = ( LPBODY_SUBCOMMAND) Data;
+      
+      if( mCom->TYPE  == SUB_STOP )
+      {
+#ifdef VISUAL_DEBUG
+         if( pHead->PortNum == IPC_DEBUG_MODE )  // Debug mode
+             sprintf( Dbgtemp, " STOP =[%c]\r\n", Data[1] );
+#endif   
+            DDX8001_MasterMute( TRUE );       
+            MasterMutFlag = TRUE;
+      }
+      else if( mCom->TYPE  == SUB_START )
+      {   
+#ifdef VISUAL_DEBUG
+            if( pHead->PortNum == IPC_DEBUG_MODE )  // Debug mode
+                 sprintf( Dbgtemp, " START =[%c]\r\n", Data[1] );
+#endif                                     
+            DDX8001_MasterMute( FALSE );        
+            MasterMutFlag = FALSE;
+      }
+      else if( mCom->TYPE  == SUB_RESTART )
+      {
+#ifdef VISUAL_DEBUG
+          if( pHead->PortNum  == IPC_DEBUG_MODE )  //Debug mode
+                sprintf( Dbgtemp, " RESTART =[%c]\r\n", Data[1] );
+#endif      
+              Run_Eeprom_to_DDX( );
+      }
+      else if( mCom->TYPE  == SUB_UPDATE )
+      {                                              
+          if(  pHead->Mode &0x02 )   // EEPROM 
+          {
+               E2pWriteUpdateFlag( Data[1]  );                   
+          }
+#ifdef VISUAL_DEBUG
+          if( pHead->PortNum  == IPC_DEBUG_MODE )  //Debug mode
+          {
+              sprintf( Dbgtemp, " Update =[%c]\r\n", Data[1] );
+          }
+#endif
+      }               
+#ifdef VISUAL_DEBUG
+     if( pHead->PortNum  == IPC_DEBUG_MODE )  //Debug mode
+     {
+          Usrprintf( Dbgtemp );
+     }
+#endif
+     return TRUE;
+}                    
+
+BYTE IPC_RCV_PASSWORD( LPIPC_HEADER pHead,BYTE *Data )
+{
+      LPBODY_PASSWORD m_PassWord;                           
+
+      m_PassWord = (LPBODY_PASSWORD)Data;      
+    
+      if( pHead->Mode &0x01 )   // DDX
+      {
+         
+      }
+      if(  pHead->Mode &0x02 )   // EEPROM 
+      {        
+          E2pWritePassword( m_PassWord->PWord );
+      }
+         
+      return TRUE;
+}
+
+BYTE IPC_RCV_SYSTEM( LPIPC_HEADER pHead, BYTE *Data )
+{       
+
+      LPBODY_SYSTEM m_System;                           
+
+      m_System = (LPBODY_SYSTEM)Data;      
+    
+      if( pHead->Mode &0x01 )   // DDX
+      {
+        
+      }
+      if(  pHead->Mode &0x02 )   // EEPROM 
+      {
+         E2pWriteSystem( m_System );
+      }
+         
+     return TRUE;
+}
+    
+BYTE IPC_RCV_MAP( LPIPC_HEADER pHead, BYTE *Data )
+{        
+      int Channel;
+      LPBODY_MAP lpChMap;
+      BYTE mMap;
+      
+      lpChMap = (LPBODY_MAP) Data;      
+      Channel = pHead->Channel;    
+      if( Channel > 7 ) Channel = 7;
+       
+      if( pHead->Mode &0x01 )   // DDX        
+      {
+         if( gInputSel == 0 )
+              mMap = lpChMap->MapM;
+         else if( gInputSel == 1 )
+              mMap = lpChMap->MapA;
+         else 
+              mMap = lpChMap->MapD;          
+            
+         DDX8001_MixingCoefficients( gInputSel, Channel/2, mMap );           
+         DDX8001_SetInputMode( gInputSel, Channel/2, mMap );
+      }
+      if(  pHead->Mode &0x02 )   // EEPROM 
+      {
+          E2pWriteChannelMapping( Channel, 0, lpChMap->MapM );    
+          E2pWriteChannelMapping( Channel, 1, lpChMap->MapA );    
+          E2pWriteChannelMapping( Channel, 2, lpChMap->MapD );     
+      }     
+         
+ #ifdef VISUAL_DEBUG
+     if( pHead->PortNum  == IPC_DEBUG_MODE )  //Debug mode
+     {
+          sprintf( Dbgtemp, "FileName=%s\r\n", lpFName->FileName );
+          Usrprintf( Dbgtemp );
+      } 
+#endif
+      return TRUE;
+}
+
+BYTE IPC_RCV_MUTE( LPIPC_HEADER pHead, BYTE *Data )
+{  
+     BYTE Flag1,Flag2;
+     int Channel;            
+     LPBODY_MUTE mMut;
+     
+     mMut = (LPBODY_MUTE)Data;
+     Channel = pHead->Channel;   
+     
+     if( Channel > 7 ) Channel = 7;
+     Flag1 = (mMut->Value1)?TRUE:FALSE ;
+     Flag2 = (mMut->Value2)?TRUE:FALSE ;
+      
+     if( pHead->Mode &0x01 )   // DDX 
+     {       
+          DDX8001_SetMute( Channel , Flag1 );   
+          DDX8001_SetMute( Channel+1 , Flag2 );   
+     }
+     if(  pHead->Mode &0x02 )   // EEPROM             
+     {           
+          E2pWriteMuteFlag( Channel , Flag1 );   
+          E2pWriteMuteFlag( Channel+1 , Flag2 );   
+     }                                             
+#ifdef VISUAL_DEBUG
+     if( pHead->PortNum  == IPC_DEBUG_MODE )  //Debug mode
+     {
+          sprintf( Dbgtemp, "Mute M=%d,F=%d,T=%d,R=%d,C=%d,W=%d\r\n",
+                mMut->VALUE[0], mMut->VALUE[1],  mMut->VALUE[2],  
+                mMut->VALUE[3], mMut->VALUE[4],  mMut->VALUE[5]);               
+         Usrprintf( Dbgtemp );
+      }
+#endif    
+      return TRUE;
+}
+
+BYTE IPC_RCV_VOLUME( LPIPC_HEADER pHead, BYTE *Data )
+{             
+       int Channel;       
+       BYTE SumFlag;
+       LPBODY_VOLUME mVol;
+                          
+       Channel = pHead->Channel;
+       if( Channel > 8 ) Channel = 8;
+
+       mVol = ( LPBODY_VOLUME )Data;
+       SumFlag = mVol->SumFlag;
+       
+       if(  pHead->Mode &0x01 )   // DDX
+       {
+           DDX8001_SetVolume( Channel, mVol->Value );
+           if( SumFlag )
+               DDX8001_SetVolume( Channel+1, mVol->Value );  
+       }
+       if(  pHead->Mode &0x02 )   // EEPROM             
+       {                 
+           E2pWriteVolume( Channel, mVol->Value );
+           if( SumFlag )
+               E2pWriteVolume( Channel+1, mVol->Value );
+           
+       } 
+#ifdef VISUAL_DEBUG
+      if( pHead->PortNum  == IPC_DEBUG_MODE )  // Debug mode
+      {
+          sprintf( Dbgtemp, "Vol M=%d,F=%d,T=%d,R=%d,C=%d,W=%d\r\n",
+                      mVol->VALUE[0], mVol->VALUE[1],  mVol->VALUE[2],  
+                      mVol->VALUE[3], mVol->VALUE[4],  mVol->VALUE[5]);
+             
+         Usrprintf( Dbgtemp );
+      }
+#endif
+      return TRUE;
+ }
+
+BYTE IPC_RCV_DELAY( LPIPC_HEADER pHead, BYTE *Data )
+{         
+    int Channel;       
+    int Value1, Value2;
+    LPBODY_DELAY mDelay;   
+    
+    Channel = pHead->Channel;
+    if( Channel > 7 ) Channel = 7;
+ 
+     mDelay = ( LPBODY_DELAY )Data;
+     Value1 = mDelay->Value1;
+     Value2 = mDelay->Value2;   
+                   
+    if(  pHead->Mode &0x01 )   // DDX
+    { 
+       TPA5050_WriteChannel( Channel/2 , Value1, Value2 );  
+    }
+    if(  pHead->Mode &0x02 )   // EEPROM             
+    {         
+         E2pWriteDelay( Channel/2 , Value1, Value2 );
+    }
+#ifdef VISUAL_DEBUG
+    if( pHead->PortNum  == IPC_DEBUG_MODE )  // Debug mode
+    {
+           sprintf( Dbgtemp, "Delay F-L=%d,F-R=%d R-L=%d, R-R=%d\r\n", 
+                                      mDelay->F_LEFT,  mDelay->F_RIGHT,
+                                      mDelay->R_LEFT,  mDelay->R_RIGHT  );          
+           Usrprintf( Dbgtemp );
+     }  
+#endif
+    return TRUE;              
+}
+
+BYTE IPC_RCV_INPUT( LPIPC_HEADER pHead, BYTE *Data )
+{
+       BYTE mSel;
+       LPBODY_INPUT mInput;
+       mInput = (LPBODY_INPUT )Data;
+       
+       mSel = mInput->VALUE;      
+      
+      if(  pHead->Mode & IPC_MODE_WRITE_DDX )   // DDX          
+      {        
+           LOW_MUTE;
+           if( MasterMutFlag == FALSE  )
+               DDX8001_MasterMute( TRUE );
+           
+           Cs4271MuteAll( TRUE, 0x7f );
+           gInputSel = mSel;
+           Cs4271ModeChange( gInputSel );
+           Cs4271MuteAll( FALSE, 0 );
+           
+           if( MasterMutFlag == FALSE  )
+               DDX8001_MasterMute( FALSE );          
+           
+           HIGH_MUTE;           
+      }
+      if(  pHead->Mode &IPC_MODE_WRITE_EEPROM )   // EEPROM
+      {             
+             E2pWriteInput( mSel );
+      }  
+#ifdef VISUAL_DEBUG
+     if( pHead->PortNum  == IPC_DEBUG_MODE )  //Debug mode
+     {
+          sprintf( Dbgtemp, "Eq =%d\r\n",  EqMode );          
+          Usrprintf( Dbgtemp );
+     }      
+#endif
+     return TRUE;
+}                                
+
+BYTE IPC_RCV_VEQFILTER( LPIPC_HEADER pHead, BYTE *Data )
+{
+      BYTE SumFlag;
+      BYTE mChannel;    
+      LPFILTERCOEF  myLpCoef;   
+      LPBODY_FILTER mLpBody;
+      
+      mLpBody =( LPBODY_FILTER) Data;
+      SumFlag = mLpBody->SumFlag;
+
+      mChannel  =  pHead->Channel;  
+      if( mChannel > 7 ) mChannel = 7;
+ 
+     // mBiquid   =  pHead->Biquid;  
+     // if( mBiquid > 9 ) mBiquid = 9;
+ 
+      myLpCoef  =  (LPFILTERCOEF)( mLpBody->VALUE);
+  
+      if( pHead->Mode &0x01 )   // DDX             
+      {                                
+           // if( MasterMutFlag == FALSE  )
+           //    DDX8001_MasterMute( TRUE );
+            memcpy((void *)&gVeqCoef[mChannel],(void *)myLpCoef, sizeof(FILTERCOEF )); 
+          //  gVeqCoef[mChannel] = (FILTERCOEF)*(mLpBody->VALUE);//*myLpCoef;
+            if( SumFlag )
+                memcpy((void *)&gVeqCoef[mChannel+1],(void *)myLpCoef, sizeof(FILTERCOEF )); 
+                // gVeqCoef[mChannel+1] = *myLpCoef;
+           
+           // if( MasterMutFlag == FALSE  )
+           //     DDX8001_MasterMute( FALSE );                   
+      }   
+      if(  pHead->Mode &0x02 )   // EEPROM             
+      {        
+           E2pWriteVeqCoef( mChannel, (BYTE *)myLpCoef );
+           if( SumFlag )         
+               E2pWriteVeqCoef( mChannel+1, (BYTE *)myLpCoef );
+       }                          
+#ifdef VISUAL_DEBUG
+     if( pHead->PortNum  == IPC_DEBUG_MODE )  //Debug mode
+     {
+           sprintf( Dbgtemp, "test = %d, %f, %d, %d,time=%ud\r\n", 
+                        myLpCoef->Filtertype,
+                        myLpCoef->BandWidth,
+                        myLpCoef->Gain,
+                        myLpCoef->Freq, gTime1ms );          
+            Usrprintf( Dbgtemp );
+      }         
+#endif             
+     return TRUE;   
+}
+
+BYTE IPC_RCV_FILTER( LPIPC_HEADER pHead, BYTE *Data )
+{        
+      BYTE SumFlag;
+      BYTE mBiquid, mChannel;    
+      LPFILTERCOEF  myLpCoef;   
+      LPBODY_FILTER mLpBody;
+      
+      mLpBody =( LPBODY_FILTER) Data;
+      SumFlag = mLpBody->SumFlag;
+
+      mChannel  =  pHead->Channel;  
+      if( mChannel > 7 ) mChannel = 7;
+ 
+      mBiquid   =  pHead->Biquid;  
+      if( mBiquid > 9 ) mBiquid = 9;
+ 
+      myLpCoef  =  (LPFILTERCOEF)( mLpBody->VALUE);
+  
+      if(  pHead->Mode &0x01 )   // DDX             
+      {                                
+           //if( MasterMutFlag == FALSE  )
+           //    DDX8001_MasterMute( TRUE );
+                      
+            CalFilterCoef( DDX8001_DEVICE_DDR_EQ, mChannel, mBiquid,  myLpCoef );   
+            if( SumFlag )
+               CalFilterCoef( DDX8001_DEVICE_DDR_EQ, mChannel+1, mBiquid,  myLpCoef );   
+           
+           //if( MasterMutFlag == FALSE  )
+           //     DDX8001_MasterMute( FALSE );                   
+      }   
+      if(  pHead->Mode &0x02 )   // EEPROM             
+      {        
+           E2pWriteCoef( mChannel, mBiquid, (BYTE *)myLpCoef );
+           if( SumFlag )         
+           {
+              E2pWriteCoef( mChannel+1, mBiquid, (BYTE *)myLpCoef );
+              E2pWriteSumFlag( mChannel, SumFlag );
+           }
+       }                          
+#ifdef VISUAL_DEBUG
+     if( pHead->PortNum  == IPC_DEBUG_MODE )  //Debug mode
+     {
+           sprintf( Dbgtemp, "test = %d, %f, %d, %d,time=%ud\r\n", 
+                        myLpCoef->Filtertype,
+                        myLpCoef->BandWidth,
+                        myLpCoef->Gain,
+                        myLpCoef->Freq, gTime1ms );          
+            Usrprintf( Dbgtemp );
+      }         
+#endif             
+     return TRUE;      
+}                  
+BYTE IPC_RCV_XFILTER( LPIPC_HEADER pHead,BYTE *Data )
+{
+      BYTE mBiquid;
+      BYTE SumFlag;
+      BYTE mChannel;    
+      LPXOVERFILTERCOEF  myLpCoef;   
+      LPBODY_FILTER mLpBody;
+      
+      mLpBody =( LPBODY_FILTER) Data;
+      SumFlag = mLpBody->SumFlag;
+      
+      mChannel  =  pHead->Channel;  
+      if( mChannel > 7 ) mChannel = 7;
+ 
+      mBiquid   =  pHead->Biquid;  
+      if( mBiquid > 1 ) mBiquid = 1;
+ 
+      myLpCoef  =  (LPXOVERFILTERCOEF)( mLpBody->VALUE);
+  
+      if(  pHead->Mode &0x01 )   // DDX             
+      {           
+           LOW_MUTE; 
+          // if( MasterMutFlag == FALSE  )
+           //     DDX8001_MasterMute( TRUE );
+           
+            XoverCalFilterCoef( mChannel, mBiquid, myLpCoef ); 
+            if( SumFlag )
+                XoverCalFilterCoef( mChannel+1, mBiquid, myLpCoef );                           
+           
+           //if( MasterMutFlag == FALSE  )
+            //    DDX8001_MasterMute( FALSE );     
+           HIGH_MUTE;
+      }   
+      if(  pHead->Mode &0x02 )   // EEPROM             
+      {      
+           E2pWriteXoverCoef( mChannel, mBiquid, (BYTE *)myLpCoef );
+           if( SumFlag )         
+               E2pWriteXoverCoef( mChannel+1, mBiquid, (BYTE *)myLpCoef );
+       }                          
+#ifdef VISUAL_DEBUG
+     if( pHead->PortNum  == IPC_DEBUG_MODE )  //Debug mode
+     {
+           sprintf( Dbgtemp, "test = %d, %f, %d, %d,time=%ud\r\n", 
+                        myLpCoef->Filtertype,
+                        myLpCoef->BandWidth,
+                        myLpCoef->Gain,
+                        myLpCoef->Freq, gTime1ms );          
+            Usrprintf( Dbgtemp );
+      }         
+#endif             
+     return TRUE;      
+}
+
+BYTE IPC_RCV_LEVEL( LPIPC_HEADER pHead,BYTE *Data )
+{
+     BYTE Value1,Value2,Channel;     
+     LPBODY_LEVEL mLevel;     
+     mLevel  = ( LPBODY_LEVEL ) Data;   
+     
+     Channel  =  pHead->Channel;  
+     if( Channel > 7 ) Channel = 7;
+ 
+     Value1  = mLevel->Atten1*17+mLevel->Value1;
+     Value2  = mLevel->Atten2*17+mLevel->Value2;         
+       
+     if( pHead->Mode &IPC_MODE_WRITE_DDX )   // DDX   
+     {   
+         LOW_MUTE; 
+         BD3812_WriteChannel( Channel/2, Value1, Value2 );
+         HIGH_MUTE;
+     }
+     if(  pHead->Mode &IPC_MODE_WRITE_EEPROM )   // EEPROM             
+     {
+        E2pWriteLevel( Channel  , mLevel->Atten1, mLevel->Value1 );
+        E2pWriteLevel( Channel+1, mLevel->Atten2, mLevel->Value2 ); 
+     }                                            
+#ifdef VISUAL_DEBUG
+     if( pHead->PortNum  == IPC_DEBUG_MODE )  //Debug mode
+     {
+         sprintf( Dbgtemp, "Channel =%d, Value=%d\r\n",  mChannel,mValue );          
+         Usrprintf( Dbgtemp );
+     }        
+#endif
+    return TRUE;
+}
+
+BYTE IPC_SND_PASSWORD(LPIPC_HEADER pHead )
+{
+     BODY_PASSWORD m_Password;                           
+
+     m_Password.IPC_ID = VA_OK;
+     m_Password.Addr   = S_Address;
+     
+     E2pReadPassWord( m_Password.PWord  );
+     m_Password.CRC =  MakeCrc( (BYTE *)&m_Password , sizeof( BODY_PASSWORD)-sizeof(WORD) );     
+     
+     IPC_SendData( (BYTE *)&m_Password, sizeof( BODY_PASSWORD ) );
+   
+     return TRUE;
+
+}
+
+BYTE IPC_SND_SYSTEM( LPIPC_HEADER pHead )
+{
+      BODY_SYSTEM m_System;                           
+
+      E2pReadSystem( (LPBODY_SYSTEM)&m_System  );
+      m_System.CRC =  MakeCrc( (BYTE *)&m_System , sizeof( BODY_SYSTEM)-sizeof(WORD) );     
+     
+      IPC_SendData( (BYTE *)&m_System, sizeof( BODY_SYSTEM ) );
+   
+#ifdef VISUAL_DEBUG
+      if( pHead->PortNum  == IPC_DEBUG_MODE )  // Debug mode
+      {
+          sprintf( Dbgtemp, "Year =%s,%d,%d,%d,%d, make crc=%d\r\n", m_sn.SName,m_sn.Year,  m_sn.Week, m_sn.Number, 
+                                      m_sn.Crc , MakeCrc(  (BYTE*)&m_sn , sizeof( BODY_SN )-sizeof(WORD) )
+                    );          
+          Usrprintf( Dbgtemp );                    
+      }     
+#endif          
+     return TRUE;
+}
+
+BYTE IPC_SND_MAP( LPIPC_HEADER pHead)
+{   
+     int Channel;  
+     BODY_MAP mBody;                                              
+    
+     Channel  =  pHead->Channel;  
+     if( Channel > 7 ) Channel = 7;
+ 
+     mBody.IPC_ID = VA_OK;
+     mBody.Addr   = S_Address;
+     mBody.MapM   = E2pReadChannelMapping( Channel, 0 );
+     mBody.MapA   = E2pReadChannelMapping( Channel, 1 );
+     mBody.MapD   = E2pReadChannelMapping( Channel, 2 );
+       
+     mBody.CRC =  MakeCrc((BYTE *)&mBody , sizeof( BODY_MAP)-sizeof(WORD) );                   
+     IPC_SendData( (BYTE *)&mBody, sizeof( BODY_MAP ) );     
+         
+#ifdef VISUAL_DEBUG
+     if( pHead->PortNum  == IPC_DEBUG_MODE )  // Debug mode
+      {                                                     
+            sprintf( Dbgtemp, "s=%d, IPC_ID = %s\r\n",sizeof( BODY_FILENAME ) , mBody.FileName  ); 
+            Usrprintf( Dbgtemp );         
+     }          
+#endif
+     return TRUE;    
+}        
+     
+BYTE IPC_SND_MUTE( LPIPC_HEADER pHead)
+{            
+   int tsiz;
+   int Channel;  
+
+   BODY_MUTE mMut;    
+ 
+   Channel = pHead->Channel;
+   //Biquid =  pHead->Biquid;
+   
+   if( Channel > 7 ) Channel = 7;
+
+   mMut.Addr   =  S_Address;
+   mMut.IPC_ID =  VA_OK;
+   mMut.Value1 =  E2pReadMuteFlag ( Channel );
+   mMut.Value2 =  E2pReadMuteFlag ( Channel+1 );   
+   
+   tsiz = sizeof( BODY_MUTE ) - sizeof( WORD );
+   mMut.CRC =  MakeCrc( (BYTE *)&mMut , tsiz );
+          
+   IPC_SendData( (BYTE *)&mMut, sizeof( BODY_MUTE ) );  
+       
+   return TRUE;    
+}
+
+BYTE IPC_SND_LEVEL( LPIPC_HEADER pHead )
+{
+      int Channel;
+      BODY_LEVEL mBody;          
+      Channel = pHead->Channel;
+      if( Channel > 7 ) Channel = 7;
+ 
+       
+      mBody.Addr   = S_Address;
+      mBody.IPC_ID = VA_OK;
+      
+      mBody.Atten1 = E2pReadAtten( Channel );   
+      mBody.Value1 = E2pReadLevel( Channel );
+ 
+      mBody.Atten2 = E2pReadAtten( Channel+1 );   
+      mBody.Value2 = E2pReadLevel(Channel+1);       
+         
+      mBody.CRC =  MakeCrc(   (BYTE *)&mBody , sizeof( BODY_LEVEL )-sizeof(WORD) );                   
+      IPC_SendData( (BYTE *)&mBody, sizeof( BODY_LEVEL ) ); 
+
+      return TRUE;
+}
+
+BYTE IPC_SND_VOLUME( LPIPC_HEADER pHead )
+{  
+      int Channel;     
+      BODY_VOLUME mBody;   
+      
+      Channel = pHead->Channel;                            
+      if( Channel > 8 ) Channel = 8;
+ 
+      mBody.Addr   = S_Address;
+      mBody.SumFlag = 0;
+      mBody.Value  = E2pReadVolume( Channel ); 
+      mBody.IPC_ID = VA_OK;
+       
+      mBody.CRC =  MakeCrc(   (BYTE *)&mBody , sizeof( BODY_VOLUME )-sizeof(WORD) );                   
+      IPC_SendData( (BYTE *)&mBody, sizeof( BODY_VOLUME ) ); 
+
+     return TRUE;
+}
+
+BYTE IPC_SND_DELAY( LPIPC_HEADER pHead )
+{              
+      int Channel;     
+      WORD Value1, Value2;
+      BODY_DELAY mBody;   
+
+      Channel = pHead->Channel;        
+      if( Channel > 7 ) Channel = 7;
+ 
+      memset ( (void *)&mBody, 0, sizeof( BODY_DELAY ));
+      
+      Value1 = E2pReadDelay( Channel );
+      Value2 = E2pReadDelay( Channel+1 );       
+  
+      mBody.Addr   = S_Address;
+      mBody.IPC_ID = VA_OK;
+      mBody.Value1 = Value1;
+      mBody.Value2 = Value2;       
+     
+      mBody.CRC =  MakeCrc( (BYTE *)&mBody , sizeof( BODY_DELAY )-sizeof(WORD) );                   
+      IPC_SendData( (BYTE *)&mBody, sizeof( BODY_DELAY ) ); 
+    
+      return TRUE;
+}
+BYTE IPC_SND_VEQVSEL( LPIPC_HEADER pHead )
+{
+     BODY_VEQVSEL mBody;   
+     memset ( (void *)&mBody, 0, sizeof( BODY_VEQVSEL ));
+       
+     mBody.Addr    = S_Address;      
+     mBody.IPC_ID  = VA_OK;
+     mBody.VALUE   = E2pReadVeqVoltage();   
+     mBody.CRC     = MakeCrc(   (BYTE *)&mBody , sizeof( BODY_VEQVSEL )-sizeof(WORD) );                   
+     IPC_SendData( (BYTE *)&mBody, sizeof( BODY_VEQVSEL ) ); 
+      
+     return TRUE;
+}
+
+BYTE IPC_SND_VEQLED( LPIPC_HEADER pHead )
+{
+     BODY_VEQLED mBody;   
+     memset ( (void *)&mBody, 0, sizeof( BODY_VEQLED ));
+       
+     mBody.Addr    = S_Address;      
+     mBody.IPC_ID  = VA_OK;
+     mBody.VALUE   = IN_VEQMODE?0:1;//E2pReadVeqVoltage();   
+     mBody.CRC     = MakeCrc(   (BYTE *)&mBody , sizeof( BODY_VEQLED )-sizeof(WORD) );                   
+     IPC_SendData( (BYTE *)&mBody, sizeof( BODY_VEQLED ) ); 
+      
+     return TRUE;
+}
+BYTE IPC_SND_INPUT( LPIPC_HEADER pHead )
+{     
+      BODY_INPUT mBody;   
+      memset ( (void *)&mBody, 0, sizeof( BODY_INPUT ));
+       
+      mBody.Addr    = S_Address;      
+      mBody.IPC_ID  = VA_OK;
+      mBody.VALUE   = E2pReadInput();   
+      mBody.CRC     = MakeCrc(   (BYTE *)&mBody , sizeof( BODY_INPUT )-sizeof(WORD) );                   
+      IPC_SendData( (BYTE *)&mBody, sizeof( BODY_INPUT ) ); 
+      
+      return TRUE;
+}
+
+BYTE IPC_SND_PRESET( LPIPC_HEADER pHead )
+{
+   BODY_PRESET mBody;   
+   memset ( (void *)&mBody, 0, sizeof( BODY_PRESET ));
+   
+   mBody.Addr    = S_Address;      
+   mBody.IPC_ID  = VA_OK;
+   mBody.Preset  = E2pReadPreset();     
+   mBody.CRC =  MakeCrc(   (BYTE *)&mBody , sizeof( BODY_PRESET)-sizeof(WORD) );                   
+   IPC_SendData( (BYTE *)&mBody, sizeof( BODY_PRESET ) );     
+   
+   return TRUE;
+}
+     
+BYTE IPC_SND_SUBCOMMAND( LPIPC_HEADER pHead )
+{
+   BODY_SUBCOMMAND mBody;   
+   memset ( (void *)&mBody, 0, sizeof( BODY_SUBCOMMAND ));
+   
+   mBody.Addr  = S_Address;      
+   mBody.IPC_ID = VA_OK;
+   mBody.TYPE = 0;     
+   mBody.FLAG = 0;     
+   mBody.CRC =  MakeCrc( (BYTE *)&mBody , sizeof( BODY_SUBCOMMAND)-sizeof(WORD) );                   
+   IPC_SendData( (BYTE *)&mBody, sizeof( BODY_SUBCOMMAND ) );     
+   
+   return TRUE;
+
+}
+
+BYTE IPC_SND_XOVERFLAG(LPIPC_HEADER pHead)
+{
+   int Channel;
+   BODY_XOVERFLAG mBody;   
+   memset ( (void *)&mBody, 0, sizeof( BODY_XOVERFLAG ));
+   Channel = pHead->Channel;
+   if( Channel > 7 ) Channel = 7;
+
+   mBody.Addr      = S_Address;    
+   mBody.IPC_ID    = VA_OK;
+   mBody.SumFlag   = 0;
+   mBody.XoverFlag = E2pReadXoverFlag( Channel );     
+         
+   mBody.CRC =  MakeCrc(   (BYTE *)&mBody , sizeof( BODY_XOVERFLAG)-sizeof(WORD) );                   
+   IPC_SendData( (BYTE *)&mBody, sizeof( BODY_XOVERFLAG ) );     
+   
+   return TRUE; 
+}
+
+BYTE IPC_SND_VEQFLAG( LPIPC_HEADER pHead)
+{
+   int Channel;
+   BODY_VEQFLAG mBody;   
+
+   memset ( (void *)&mBody, 0, sizeof( BODY_VEQFLAG ));
+   Channel = pHead->Channel;
+   if( Channel > 7 ) Channel = 7;
+
+   mBody.Addr      = S_Address;    
+   mBody.IPC_ID    = VA_OK;
+   mBody.SumFlag   = 0;
+   mBody.VeqFlag   = E2pReadVeqFlag( Channel );     
+         
+   mBody.CRC =  MakeCrc(   (BYTE *)&mBody , sizeof( BODY_VEQFLAG)-sizeof(WORD) );                   
+   IPC_SendData( (BYTE *)&mBody, sizeof( BODY_VEQFLAG ) );     
+   
+   return TRUE; 
+}
+
+BYTE IPC_SND_EQFLAG(LPIPC_HEADER pHead)
+{
+   int Channel;
+   BODY_EQFLAG mBody;   
+   memset ( (void *)&mBody, 0, sizeof( BODY_EQFLAG ));
+   Channel = pHead->Channel;
+   if( Channel > 7 ) Channel = 7;
+
+   mBody.Addr      = S_Address;    
+   mBody.IPC_ID    = VA_OK;
+   mBody.SumFlag   = 0;
+   mBody.EqFlag    = E2pReadEqFlag( Channel );     
+         
+   mBody.CRC =  MakeCrc(   (BYTE *)&mBody , sizeof( BODY_EQFLAG)-sizeof(WORD) );                   
+   IPC_SendData( (BYTE *)&mBody, sizeof( BODY_EQFLAG ) );     
+   
+   return TRUE; 
+}
+
+BYTE IPC_SND_HIGHLOW( LPIPC_HEADER pHead )
+{
+   BODY_HIGHLOW mBody;   
+   memset ( (void *)&mBody, 0, sizeof( BODY_HIGHLOW ));
+   
+   mBody.Addr     = S_Address;    
+   mBody.IPC_ID   = VA_OK;
+   mBody.HighLow  =  E2pReadHighLow();     
+   mBody.CRC =  MakeCrc(   (BYTE *)&mBody , sizeof( BODY_HIGHLOW)-sizeof(WORD) );                   
+   IPC_SendData( (BYTE *)&mBody, sizeof( BODY_HIGHLOW ) );     
+   
+   return TRUE; 
+}
+
+BYTE IPC_SND_PHASE( LPIPC_HEADER pHead )
+{
+   int Channel;
+   BODY_PHASE mBody;   
+   memset ( (void *)&mBody, 0, sizeof( BODY_PHASE ));
+   Channel = pHead->Channel;
+   
+   mBody.Addr     = S_Address;    
+   mBody.IPC_ID   = VA_OK;
+   mBody.Phase    =  E2pReadPhase( Channel );     
+   mBody.CRC =  MakeCrc(   (BYTE *)&mBody , sizeof( BODY_PHASE)-sizeof(WORD) );                   
+   IPC_SendData( (BYTE *)&mBody, sizeof( BODY_PHASE ) );     
+   
+   return TRUE; 
+}
+
+BYTE IPC_SND_VEQFILTER( LPIPC_HEADER pHead )
+{
+   int tsiz;
+   int Channel;  
+   BODY_FILTER mFilter;      
+   
+   memset ( (void *)&mFilter, 0, sizeof( BODY_FILTER ));
+   Channel = pHead->Channel;
+   //Biquid =  pHead->Biquid;
+   
+   if( Channel > 7 ) Channel = 7;
+   //if( Biquid  > 9 ) Biquid  = 9;
+   
+   mFilter.Addr    = S_Address;
+   mFilter.IPC_ID  = VA_OK;
+   mFilter.SumFlag = 0;// E2pReadSumFlag( Channel );
+   E2pReadVeqCoef( Channel, mFilter.VALUE );  
+   tsiz = sizeof( BODY_FILTER ) - sizeof( WORD );
+   mFilter.CRC =  MakeCrc( (BYTE *)&mFilter , tsiz );
+          
+   IPC_SendData( (BYTE *)&mFilter, sizeof( BODY_FILTER ) );  
+       
+   return TRUE;   
+
+}
+BYTE IPC_SND_FILTER( LPIPC_HEADER pHead )
+{                
+   int tsiz;
+   int Channel, Biquid;  
+   BODY_FILTER mFilter;      
+   
+   memset ( (void *)&mFilter, 0, sizeof( BODY_FILTER ));
+   Channel = pHead->Channel;
+   Biquid =  pHead->Biquid;
+   
+   if( Channel > 7 ) Channel = 7;
+   if( Biquid  > 9 ) Biquid  = 9;
+   
+   mFilter.Addr    = S_Address;
+   mFilter.IPC_ID  = VA_OK;
+   mFilter.SumFlag = E2pReadSumFlag( Channel );
+   E2pReadCoef( Channel, Biquid, mFilter.VALUE );  
+   tsiz = sizeof( BODY_FILTER ) - sizeof( WORD );
+   mFilter.CRC =  MakeCrc( (BYTE *)&mFilter , tsiz );
+          
+   IPC_SendData( (BYTE *)&mFilter, sizeof( BODY_FILTER ) );  
+       
+   return TRUE;   
+}
+
+BYTE IPC_SND_XFILTER(LPIPC_HEADER pHead)
+{
+   int tsiz;
+   int Channel, Biquid;  
+   BODY_FILTER mFilter;      
+   
+   memset ( (void *)&mFilter, 0, sizeof( BODY_FILTER ));
+   Channel = pHead->Channel;
+   Biquid =  pHead->Biquid;
+   
+   if( Channel > 7 ) Channel = 7;
+   if( Biquid  > 1 ) Biquid  = 1;
+   
+   mFilter.Addr   = S_Address;
+   mFilter.IPC_ID = VA_OK;
+   mFilter.SumFlag = 0;//E2pReadSumFlag( Channel );
+   
+   E2pReadXoverCoef( Channel, Biquid, mFilter.VALUE );  
+   tsiz = sizeof( BODY_FILTER ) - sizeof( WORD );
+   mFilter.CRC =  MakeCrc( (BYTE *)&mFilter , tsiz );
+          
+   IPC_SendData( (BYTE *)&mFilter, sizeof( BODY_FILTER ) );  
+       
+   return TRUE;   
+}
+
+void IPC_RcvProcess( BYTE *Data )
+{
+      LPIPC_HEADER pHead; 
+      BYTE RcvBody[100];
+      BYTE RcvByte;
+      WORD Crc,RcvCrc;
+                                                   
+      pHead   = (LPIPC_HEADER)Data;       
+      
+      if( IPC_Get_RxCount1() >= pHead->BodyLength)
+      {
+          RcvByte = IPC_RcvData_Interrupt( RcvBody, pHead->BodyLength );         
+          Crc =  MakeCrc(  RcvBody , pHead->BodyLength-sizeof(WORD) );            
+          RcvCrc = (WORD)RcvBody[pHead->BodyLength-1]<<8 | (WORD)RcvBody[pHead->BodyLength-2];    
+         
+          if( RcvBody[0] == S_Address && RcvByte == pHead->BodyLength && Crc ==  RcvCrc  )
+         {   
+            if(  pHead->IPC_ID < sizeof(IPCRcvfun)/2 )
+           {                                                                       
+               if( IPCRcvfun[pHead->IPC_ID]( pHead, RcvBody ) == TRUE )        //  Run Command  
+               {
+                 IPC_Send_Response( Data, VA_OK );
+               }
+               else
+               {           
+                  IPC_Send_Response( Data, VA_ERROR);
+                  IPC_ResetCount1();
+               }
+            }
+            else
+            {
+              IPC_Send_Response( Data, VA_ERROR );      
+            }
+         }
+      }
+}            
+
+void IPC_SndProcess( BYTE *Data )
+{
+      LPIPC_HEADER pHead;      
+                                                
+      pHead = (LPIPC_HEADER)Data;     
+      if(   pHead->IPC_ID < sizeof(IPCSndfun)/2  ) //&&   Crc ==  RcvCrc )
+      {
+          if( IPCSndfun[pHead->IPC_ID]( pHead ) == FALSE )        //  Run Command
+              IPC_Send_Response( Data, VA_ERROR );
+      }
+      else
+      {                           
+           IPC_Send_Response( Data, VA_ERROR );      
+      }
+}            
+
+BOOL CheckSerialNumber( void )
+{       
+     /*
+      BYTE rReg1,rReg2;
+      BODY_SN m_sn;             
+      WORD Crc;     
+       
+      E2pReadSn( (BYTE*)&m_sn , sizeof( BODY_SN ));
+      Crc =  MakeCrc(  (BYTE*)&m_sn , sizeof( BODY_SN )-sizeof(WORD) );   
+     
+          
+      rReg1 =  I2C_Read ( DELAY1_DEVICE_ADDR, 0x00 );     
+      rReg2 =  I2C_Read ( DELAY2_DEVICE_ADDR, 0x00 ); 
+      
+
+      if( Crc == m_sn.Crc  && rReg1 == 0 && rReg2 == 0 )
+               return TRUE;   
+               
+      else return FALSE;     */
+    return TRUE;
+}                       
+
+
+void IPC_RunProcess( void )
+{                   
+     BYTE RcvHead[30];
+     BYTE RcvByte;      
+     WORD Crc,RcvCrc;                
+     LPIPC_HEADER pHead;                     
+
+     //SnFlag = CheckSerialNumber( );
+         
+    // while( TRUE )
+     {      
+       
+            //RcvByte = IPC_RcvData( RcvHead, sizeof( IPC_HEADER ) );
+             
+            RcvByte = IPC_RcvData_Interrupt( RcvHead, sizeof( IPC_HEADER ) );
+               
+            pHead = ( LPIPC_HEADER )RcvHead;      
+ 
+            Crc =  MakeCrc(  RcvHead , sizeof( IPC_HEADER )-sizeof(WORD) );
+            RcvCrc = (WORD)RcvHead[sizeof( IPC_HEADER )-1]<<8 | (WORD)RcvHead[sizeof( IPC_HEADER )-2]; 
+                
+            if( pHead->Addr == S_Address && RcvByte == sizeof( IPC_HEADER ) &&RcvCrc == Crc )
+            {
+                //Crc =  MakeCrc(  RcvHead , sizeof( IPC_HEADER )-sizeof(WORD) );
+                //RcvCrc = (WORD)RcvHead[sizeof( IPC_HEADER )-1]<<8 | (WORD)RcvHead[sizeof( IPC_HEADER )-2];               
+                //if( RcvByte == sizeof( IPC_HEADER ) && RcvCrc == Crc && SnFlag )
+                 
+                //{                                                                
+                   if( pHead->Mode ==  IPC_MODE_READ )
+                       IPC_SndProcess( RcvHead );
+                   else IPC_RcvProcess( RcvHead );
+               // }
+               // else
+               // {                
+                  // if( SnFlag == FALSE )             
+                   //    IPC_Send_Response( RcvHead, VA_SNERROR );                                 
+                   // else if ( RcvCrc != Crc )
+                   //    IPC_Send_Response( RcvHead, VA_CRCERROR );                                 
+                  //  else
+                  //     IPC_Send_Response( RcvHead, VA_ERROR );                                 
+               // }
+            }
+         
+     }
+
+}

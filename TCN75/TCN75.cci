@@ -1,0 +1,10 @@
+VERSION:3 SOURCE_TIMESTAMP:48BB92AB
+NODE:I LEVEL:0 LINE:1 "C:\cvavr\inc\mega128.h"
+NODE:I LEVEL:0 LINE:2 "C:\cvavr\inc\stdio.h"
+NODE:I LEVEL:0 LINE:3 "C:\cvavr\inc\string.h"
+NODE:I LEVEL:0 LINE:4 "C:\cvavr\inc\delay.h"
+NODE:I LEVEL:0 LINE:5 "C:\cvavr\inc\float.h"
+NODE:I LEVEL:0 LINE:7 "C:\Project\APRO\EP1G\Micom\Main\TCN75\TCN75.h"
+NODE:I LEVEL:0 LINE:8 "C:\Project\APRO\EP1G\Micom\Main\TCN75\..\I2cLib\I2CLib.h"
+NODE:F LEVEL:0 LINE:11 "TCN75_init(void)"
+NODE:F LEVEL:0 LINE:16 "TCN75_Read(void)"

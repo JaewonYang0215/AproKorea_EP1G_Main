@@ -1,0 +1,24 @@
+#include <mega128.h>  
+
+#define  EEWE  1
+#define  EEMWE 2    
+#define  EERE  0
+/*       
+void _EEPROMWrite( unsigned int addr,unsigned char data )
+{
+   while(EECR & (1 << EEWE));
+   EEAR = addr;
+   EEDR = data;
+   EECR |= ( 1 << EEMWE);
+   EECR |= ( 1 << EEWE);
+}
+
+
+unsigned char _EEPROMRead(unsigned int addr)
+{
+   while(EECR & (1 << EEWE));
+   EEAR = addr;
+   EECR |= ( 1 << EERE);
+   return EEDR;
+}
+*/

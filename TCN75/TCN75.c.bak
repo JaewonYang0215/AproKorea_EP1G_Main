@@ -1,0 +1,244 @@
+#include <mega128.h>
+#include <stdio.h>
+#include <string.h>
+#include <delay.h>
+
+#include "ADS1248.h"
+#include "../IPC/IPCLib.h"
+#include "../Uart/Uartlib.h"
+#include "../UserDefine.h"
+
+
+void ADS1248_WriteByte(  BYTE data );
+BYTE ADS1248_ReadByte( void  );
+void  ADS1248_WriteRegByte(  BYTE bCS, BYTE addr, BYTE Data );
+BYTE  ADS1248_ReadRegByte( BYTE bCS, BYTE addr );
+void ADS1248_StopReadCommand( BYTE bCS );
+void ADS1248_ReadContinueCommand( BYTE bCS );
+void  ADS1248ResetCommand( BYTE bCS );
+void ADS1248_ChangeChannel( BYTE bCS, BYTE Ch );
+
+void ADS1248_init( void )
+{
+   BYTE temp;
+
+  // LOW_ADS1248_CS1;
+
+   ADS1248_StopReadCommand( TH_CS );
+   ADS1248ResetCommand( TH_CS );
+
+   ADS1248_WriteRegByte( TH_CS, 0, 0x07 );
+   ADS1248_WriteRegByte( TH_CS, 2, 0x20 );
+
+   ADS1248_WriteRegByte( TH_CS, 3, 0x06 );
+  // ADS1248_WriteRegByte( TH_CS, 0x0a, 0x06 );
+
+   temp = ADS1248_ReadRegByte( TH_CS, 0x00 );
+
+  // ADS1248_ReadContinueCommand( TH_CS );
+   MyPrint( "reg3=0X%x\r\n", temp );
+
+  // HIGH_ADS1248_CS1;
+}
+
+void ADS1248_ChangeChannel( BYTE bCS, BYTE Ch )
+{
+   if( bCS == TH_CS )
+         LOW_ADS1248_CS1;
+   else  LOW_ADS1248_CS2;
+
+   ADS1248_WriteRegByte( TH_CS, 0, 0x07|((Ch&0xf07)<<3 ));
+
+   if( bCS == TH_CS )
+        HIGH_ADS1248_CS1;
+   else HIGH_ADS1248_CS2;
+}
+
+void ADS1248_ReadContinueCommand( BYTE bCS )
+{
+   if( bCS == TH_CS )
+         LOW_ADS1248_CS1;
+   else  LOW_ADS1248_CS2;
+
+   ADS1248_WriteByte( CMD_ADS1248_RDATC )  ; // command
+
+   if( bCS == TH_CS )
+        HIGH_ADS1248_CS1;
+   else HIGH_ADS1248_CS2;
+
+   delay_ms( 10 );
+
+}
+void ADS1248_StopReadCommand( BYTE bCS )
+{
+   if( bCS == TH_CS )
+         LOW_ADS1248_CS1;
+   else  LOW_ADS1248_CS2;
+
+   ADS1248_WriteByte( CMD_ADS1248_SDATAC )  ; //SDATAC command
+
+   if( bCS == TH_CS )
+        HIGH_ADS1248_CS1;
+   else HIGH_ADS1248_CS2;
+
+   delay_ms( 10 );
+
+}
+
+BYTE  ADS1248_ReadRegByte( BYTE bCS, BYTE addr )
+{
+   BYTE temp;
+   if( bCS == TH_CS )
+         LOW_ADS1248_CS1;
+   else  LOW_ADS1248_CS2;
+
+   ADS1248_WriteByte( CMD_ADS1248_RREG|(addr&0x0f) );
+   ADS1248_WriteByte( 0x00 );
+   temp = ADS1248_ReadByte();
+
+   if( bCS == TH_CS )
+          HIGH_ADS1248_CS1;
+   else   HIGH_ADS1248_CS2;
+   delay_ms( 1 );
+
+   return temp;
+}
+
+void  ADS1248_WriteRegByte( BYTE bCS, BYTE addr, BYTE Data )
+{
+   if( bCS == TH_CS )
+        LOW_ADS1248_CS1;
+   else LOW_ADS1248_CS2;
+   delay_ms( 2 );
+
+   ADS1248_WriteByte( CMD_ADS1248_WREG|(addr&0x0f) );
+   ADS1248_WriteByte( 0x00 );
+   ADS1248_WriteByte( Data );
+
+   delay_ms( 2 );
+
+   if( bCS == TH_CS )
+          HIGH_ADS1248_CS1;
+   else   HIGH_ADS1248_CS2;
+
+   delay_ms( 10 );
+
+}
+
+
+DWORD ADS1248_ADConvertData( BYTE bCS )
+{
+   DWORD temp;
+   BYTE AD1, AD2, AD3;
+
+   if( bCS == TH_CS )
+        LOW_ADS1248_CS1;
+   else LOW_ADS1248_CS2;
+
+
+   while( !IN_ADS1248_DRDY );
+
+ //  ADS1248_WriteByte( CMD_ADS1248_RDATC );
+   ADS1248_WriteByte( CMD_ADS1248_RDAT );
+  // SPDR;
+  // delay_ms( 2 );
+
+   AD1 = ADS1248_ReadByte();
+   AD2 = ADS1248_ReadByte();
+   AD3 = ADS1248_ReadByte();
+
+   temp = ((DWORD)AD1)<<16|((DWORD)AD2)<<8|(DWORD)AD3 ;
+
+  // ADS1248_WriteByte( CMD_ADS1248_SDATAC )  ; //SDATAC command
+
+   if( bCS == TH_CS )
+          HIGH_ADS1248_CS1;
+   else   HIGH_ADS1248_CS2;
+
+   MyPrint( "reg0=0X%x-", AD1 );
+   MyPrint( "%x-", AD2 );
+   MyPrint( "%x\r\n", AD3 );
+
+   return temp;
+}
+
+
+void ADS1248ResetCommand( BYTE Sel )
+{
+  if( Sel <VOL_CH1 )
+        LOW_ADS1248_CS1;
+  else  LOW_ADS1248_CS2;
+
+  ADS1248_WriteByte( CMD_ADS1248_RESET );
+
+  if( Sel < VOL_CH1 )
+        HIGH_ADS1248_CS1;
+  else  HIGH_ADS1248_CS2;
+
+}
+
+BYTE ADS1248_ReadByte( void  )
+{
+   BYTE temp;
+
+   SPDR=0x00;
+   while(!(SPSR&0x80));
+   temp=SPDR;
+
+   return temp;
+}
+
+void ADS1248_WriteByte(BYTE data )
+{
+
+   SPDR = data;
+   while(!(SPSR&0x80));
+}
+
+
+DWORD ADS1248_Read( BYTE Sel )
+{
+   DWORD val;
+
+  if( Sel <VOL_CH1 )
+        LOW_ADS1248_CS1;
+  else  LOW_ADS1248_CS2;
+
+   SPDR= 0xc7; //ch1
+   while(!(SPSR&0x80));
+   SPDR=0x00;
+   while(!(SPSR&0x80));
+  // high_data=SPDR;
+
+  if( Sel < VOL_CH1 )
+        HIGH_ADS1248_CS1;
+  else  HIGH_ADS1248_CS2;
+
+  return val;
+}
+
+void ADS1248_Write( WORD data )
+{
+  int i = 0;
+
+  LOW_DAC8420_CS;
+
+  for( i=0;i<16;i++ )
+  {
+    LOW_SCLK;
+    if( data&0x8000 ) HIGH_SDAT;
+    else              LOW_SDAT;
+
+    HIGH_SCLK;
+    data <<= 1;
+  }
+ // LOW_SCLK;
+  HIGH_DAC8420_CS;
+ // HIGH_SCLK;
+
+  LOW_DAC8420_LD ;
+  HIGH_DAC8420_LD;
+
+  LOW_SCLK;
+
+}
