@@ -1179,6 +1179,8 @@ _0x6003D:
 	.DB  LOW(_IPC0_SND_MODE),HIGH(_IPC0_SND_MODE),LOW(_IPC0_SND_RUN),HIGH(_IPC0_SND_RUN),LOW(_IPC0_SND_DOSE),HIGH(_IPC0_SND_DOSE),LOW(_IPC0_SND_VOLTAGE),HIGH(_IPC0_SND_VOLTAGE)
 	.DB  LOW(_IPC0_SND_DEPTH),HIGH(_IPC0_SND_DEPTH),LOW(_IPC0_SND_SPEED),HIGH(_IPC0_SND_SPEED),LOW(_IPC0_SND_ELCOUNT),HIGH(_IPC0_SND_ELCOUNT),LOW(_IPC0_SND_FLAG),HIGH(_IPC0_SND_FLAG)
 	.DB  LOW(_IPC0_SND_EL_MAP),HIGH(_IPC0_SND_EL_MAP),LOW(_IPC0_SND_MOTOR_POS1),HIGH(_IPC0_SND_MOTOR_POS1),LOW(_IPC0_SND_MOTOR_POS2),HIGH(_IPC0_SND_MOTOR_POS2),LOW(_IPC0_SND_ERROR),HIGH(_IPC0_SND_ERROR)
+_0xE0003:
+	.DB  0x88,0x13
 _0x2080060:
 	.DB  0x1
 _0x2080000:
@@ -1205,6 +1207,10 @@ __GLOBAL_INI_TBL:
 	.DW  0x18
 	.DW  _IPC0Sndfun
 	.DW  _0x6003D*2
+
+	.DW  0x02
+	.DW  _gSetVolagteInitTime
+	.DW  _0xE0003*2
 
 	.DW  0x01
 	.DW  __seed_G104
@@ -1339,7 +1345,7 @@ _0x3:
 ; 0000 000E      EECR |= ( 1 << EEWE);
 	SBI  0x1C,1
 ; 0000 000F }
-	JMP  _0x20A000D
+	JMP  _0x20A000E
 ; .FEND
 ;
 ;BYTE _EEPROMRead( WORD addr)
@@ -1362,7 +1368,7 @@ _0x6:
 	SBI  0x1C,0
 ; 0000 0016      return EEDR;
 	IN   R30,0x1D
-	JMP  _0x20A000B
+	JMP  _0x20A000C
 ; 0000 0017 }
 ; .FEND
 ;BYTE E2pRead( WORD Addr )
@@ -1415,7 +1421,7 @@ _0xB:
 ; 0000 0024 }
 	LDD  R17,Y+1
 	LDD  R16,Y+0
-	JMP  _0x20A000F
+	JMP  _0x20A0010
 ; .FEND
 ;void E2pWriteLen( BYTE *bDat, BYTE bAddr, BYTE nLen )
 ; 0000 0026 {
@@ -1459,7 +1465,7 @@ _0xE:
 ; 0000 002C }
 	LDD  R17,Y+1
 	LDD  R16,Y+0
-	JMP  _0x20A000F
+	JMP  _0x20A0010
 ; .FEND
 ;#include <mega128.h>
 	#ifndef __SLEEP_DEFINED__
@@ -1939,7 +1945,7 @@ _0x40004:
 	MOVW R26,R16
 	RCALL _DAC7611_Write
 ; 0002 0027 }
-	RJMP _0x20A000E
+	RJMP _0x20A000F
 ; .FEND
 ;
 ;void DAC7611_Write( WORD data )
@@ -2014,9 +2020,9 @@ _0x4000D:
 ; 0002 0045      HIGH_LD;
 	SBI  0x1B,3
 ; 0002 0046 }
-_0x20A000E:
-	CALL __LOADLOCR4
 _0x20A000F:
+	CALL __LOADLOCR4
+_0x20A0010:
 	ADIW R28,6
 	RET
 ; .FEND
@@ -2103,7 +2109,7 @@ _IPC1_RCV_MODE:
 	ST   -Y,R27
 	ST   -Y,R26
 ;	*pHead -> Y+0
-	RJMP _0x20A000A
+	RJMP _0x20A000B
 ; 0003 0040 }
 ; .FEND
 ;
@@ -2134,7 +2140,7 @@ _0x60005:
 ; 0003 0049 
 ; 0003 004A    return TRUE;
 _0x60007:
-	RJMP _0x20A000C
+	RJMP _0x20A000D
 ; 0003 004B }
 ; .FEND
 ;
@@ -2170,7 +2176,7 @@ _0x60008:
 ; 0003 0052 
 ; 0003 0053    return TRUE;
 _0x60009:
-	RJMP _0x20A000A
+	RJMP _0x20A000B
 ; 0003 0054 }
 ; .FEND
 ;
@@ -2210,7 +2216,7 @@ _0x6000C:
 ; 0003 0060 
 ; 0003 0061    return TRUE;
 _0x6000F:
-	RJMP _0x20A000A
+	RJMP _0x20A000B
 ; 0003 0062 }
 ; .FEND
 ;
@@ -2236,7 +2242,7 @@ _0x60012:
 ; 0003 0069 
 ; 0003 006A    return TRUE;
 _0x60013:
-	RJMP _0x20A000A
+	RJMP _0x20A000B
 ; 0003 006B }
 ; .FEND
 ;
@@ -2264,7 +2270,7 @@ _0x60014:
 ; 0003 0072 
 ; 0003 0073    return TRUE;
 _0x60015:
-	RJMP _0x20A000A
+	RJMP _0x20A000B
 ; 0003 0074 }
 ; .FEND
 ;
@@ -2299,7 +2305,7 @@ _0x60016:
 ; 0003 007B 
 ; 0003 007C    return TRUE;
 _0x60017:
-	RJMP _0x20A000A
+	RJMP _0x20A000B
 ; 0003 007D }
 ; .FEND
 ;
@@ -2314,7 +2320,7 @@ _IPC1_RCV_FLAG:
 	STS  _gFlag,R30
 ; 0003 0082 
 ; 0003 0083    return TRUE;
-	RJMP _0x20A000A
+	RJMP _0x20A000B
 ; 0003 0084 }
 ; .FEND
 ;
@@ -2352,7 +2358,7 @@ _IPC1_RCV_EL_MAP:
 	__PUTB1MN _gElMatrix,3
 ; 0003 008C 
 ; 0003 008D    return TRUE;
-	RJMP _0x20A000A
+	RJMP _0x20A000B
 ; 0003 008E }
 ; .FEND
 ;
@@ -2364,7 +2370,7 @@ _IPC1_RCV_MOTOR_POS1:
 	ST   -Y,R27
 	ST   -Y,R26
 ;	*pHead -> Y+0
-	RJMP _0x20A000A
+	RJMP _0x20A000B
 ; 0003 0093 }
 ; .FEND
 ;
@@ -2376,7 +2382,7 @@ _IPC1_RCV_MOTOR_POS2:
 	ST   -Y,R27
 	ST   -Y,R26
 ;	*pHead -> Y+0
-	RJMP _0x20A000A
+	RJMP _0x20A000B
 ; 0003 0098 }
 ; .FEND
 ;
@@ -2493,7 +2499,7 @@ _IPC1_SND_MODE:
 	LDI  R26,LOW(7)
 	CALL _IPC_SendData1
 ; 0003 00D0    return TRUE;
-	RJMP _0x20A000A
+	RJMP _0x20A000B
 ; 0003 00D1 }
 ; .FEND
 ;BYTE IPC1_SND_RUN( LPIPC_HEADER pHead )
@@ -2515,7 +2521,7 @@ _IPC1_SND_RUN:
 	LDI  R26,LOW(7)
 	CALL _IPC_SendData1
 ; 0003 00DB    return TRUE;
-	RJMP _0x20A000A
+	RJMP _0x20A000B
 ; 0003 00DC }
 ; .FEND
 ;
@@ -2538,7 +2544,7 @@ _IPC1_SND_DOSE:
 	LDI  R26,LOW(7)
 	CALL _IPC_SendData1
 ; 0003 00E7    return TRUE;
-	RJMP _0x20A000A
+	RJMP _0x20A000B
 ; 0003 00E8 }
 ; .FEND
 ;
@@ -2562,7 +2568,7 @@ _IPC1_SND_VOLTAGE:
 	CALL _IPC_SendData1
 ; 0003 00F3 
 ; 0003 00F4    return TRUE;
-	RJMP _0x20A000A
+	RJMP _0x20A000B
 ; 0003 00F5 }
 ; .FEND
 ;
@@ -2586,7 +2592,7 @@ _IPC1_SND_DEPTH:
 	CALL _IPC_SendData1
 ; 0003 0100 
 ; 0003 0101    return TRUE;
-	RJMP _0x20A000A
+	RJMP _0x20A000B
 ; 0003 0102 
 ; 0003 0103 }
 ; .FEND
@@ -2610,7 +2616,7 @@ _IPC1_SND_SPEED:
 	LDI  R26,LOW(7)
 	CALL _IPC_SendData1
 ; 0003 010E    return TRUE;
-	RJMP _0x20A000A
+	RJMP _0x20A000B
 ; 0003 010F 
 ; 0003 0110 }
 ; .FEND
@@ -2634,7 +2640,7 @@ _IPC1_SND_ELCOUNT:
 	LDI  R26,LOW(7)
 	CALL _IPC_SendData1
 ; 0003 011B    return TRUE;
-	RJMP _0x20A000A
+	RJMP _0x20A000B
 ; 0003 011C }
 ; .FEND
 ;
@@ -2660,7 +2666,7 @@ _IPC1_SND_FLAG:
 	CALL _IPC_SendData1
 ; 0003 0127 
 ; 0003 0128    return TRUE;
-	RJMP _0x20A000A
+	RJMP _0x20A000B
 ; 0003 0129 
 ; 0003 012A }
 ; .FEND
@@ -2701,7 +2707,7 @@ _IPC1_SND_EL_MAP:
 	CALL _IPC_SendData1
 ; 0003 0135 
 ; 0003 0136    return TRUE;
-	RJMP _0x20A000A
+	RJMP _0x20A000B
 ; 0003 0137 }
 ; .FEND
 ;
@@ -2729,7 +2735,7 @@ _IPC1_SND_MOTOR_POS1:
 	CALL _IPC_SendData1
 ; 0003 0142 
 ; 0003 0143    return TRUE;
-	RJMP _0x20A000A
+	RJMP _0x20A000B
 ; 0003 0144 
 ; 0003 0145 }
 ; .FEND
@@ -2758,7 +2764,7 @@ _IPC1_SND_MOTOR_POS2:
 	CALL _IPC_SendData1
 ; 0003 0150 
 ; 0003 0151    return TRUE;
-	RJMP _0x20A000A
+	RJMP _0x20A000B
 ; 0003 0152 
 ; 0003 0153 }
 ; .FEND
@@ -2789,7 +2795,7 @@ _IPC1_SND_ERROR:
 	LDI  R30,LOW(1)
 	STS  _gReadyActionFlag,R30
 ; 0003 0161    return TRUE;
-	RJMP _0x20A000A
+	RJMP _0x20A000B
 ; 0003 0162 
 ; 0003 0163 }
 ; .FEND
@@ -2912,7 +2918,7 @@ _0x60027:
 ; 0003 018F      }
 ; 0003 0190 
 ; 0003 0191 }
-	RJMP _0x20A0008
+	RJMP _0x20A0009
 ; .FEND
 ; void IPC_Send_Response1( BYTE *Data, BYTE Res )
 ; 0003 0193 {
@@ -2934,9 +2940,7 @@ _IPC_Send_Response1:
 ; 0003 019D      IPC_SendData1( Data, sizeof( IPC_HEADER ) );
 	CALL _IPC_SendData1
 ; 0003 019E }
-	LDD  R17,Y+1
-	LDD  R16,Y+0
-	JMP  _0x20A0001
+	RJMP _0x20A0008
 ; .FEND
 ;
 ;void IPC_RcvProcess1( BYTE *Data )
@@ -3150,7 +3154,7 @@ _0x60031:
 ; 0003 0209    gElCompletFlag = FALSE;
 	STS  _gElCompletFlag,R30
 ; 0003 020A    return TRUE;
-	RJMP _0x20A000A
+	RJMP _0x20A000B
 ; 0003 020B }
 ; .FEND
 ;
@@ -3201,7 +3205,7 @@ _0x60032:
 ; 0003 021F    }
 _0x60038:
 ; 0003 0220    return TRUE;
-	RJMP _0x20A000A
+	RJMP _0x20A000B
 ; 0003 0221 }
 ; .FEND
 ;
@@ -3214,7 +3218,7 @@ _IPC0_RCV_DOSE:
 	ST   -Y,R27
 	ST   -Y,R26
 ;	*pHead -> Y+0
-	RJMP _0x20A000A
+	RJMP _0x20A000B
 ; 0003 0227 }
 ; .FEND
 ;
@@ -3226,7 +3230,7 @@ _IPC0_RCV_VOLTAGE:
 	ST   -Y,R27
 	ST   -Y,R26
 ;	*pHead -> Y+0
-	RJMP _0x20A000A
+	RJMP _0x20A000B
 ; 0003 022C }
 ; .FEND
 ;
@@ -3238,7 +3242,7 @@ _IPC0_RCV_DEPTH:
 	ST   -Y,R27
 	ST   -Y,R26
 ;	*pHead -> Y+0
-	RJMP _0x20A000A
+	RJMP _0x20A000B
 ; 0003 0231 }
 ; .FEND
 ;BYTE IPC0_RCV_SPEED( LPIPC_HEADER pHead )
@@ -3249,7 +3253,7 @@ _IPC0_RCV_SPEED:
 	ST   -Y,R27
 	ST   -Y,R26
 ;	*pHead -> Y+0
-	RJMP _0x20A000A
+	RJMP _0x20A000B
 ; 0003 0235 }
 ; .FEND
 ;BYTE IPC0_RCV_ELCOUNT( LPIPC_HEADER pHead )
@@ -3260,7 +3264,7 @@ _IPC0_RCV_ELCOUNT:
 	ST   -Y,R27
 	ST   -Y,R26
 ;	*pHead -> Y+0
-	RJMP _0x20A000A
+	RJMP _0x20A000B
 ; 0003 0239 }
 ; .FEND
 ;
@@ -3288,7 +3292,7 @@ _0x60039:
 ; 0003 0243 
 ; 0003 0244    return TRUE;
 _0x6003A:
-	RJMP _0x20A000C
+	RJMP _0x20A000D
 ; 0003 0245 }
 ; .FEND
 ;BYTE IPC0_RCV_EL_MAP( LPIPC_HEADER pHead )
@@ -3299,7 +3303,7 @@ _IPC0_RCV_EL_MAP:
 	ST   -Y,R27
 	ST   -Y,R26
 ;	*pHead -> Y+0
-	RJMP _0x20A000A
+	RJMP _0x20A000B
 ; 0003 0249 }
 ; .FEND
 ;
@@ -3380,10 +3384,10 @@ _0x6003C:
 ; 0003 0269    gCurMode = CUR_ERROR;
 ; 0003 026A 
 ; 0003 026B    return TRUE;
-_0x20A000C:
+_0x20A000D:
 	LDI  R30,LOW(1)
 	LDD  R17,Y+0
-_0x20A000D:
+_0x20A000E:
 	ADIW R28,3
 	RET
 ; 0003 026C }
@@ -3435,7 +3439,7 @@ _IPC0_SND_MODE:
 ; 0003 028F    pHead->data2 =  (BYTE)(gMode&0xff);
 ; 0003 0290 
 ; 0003 0291    pHead->checksum = MakeCrc( (BYTE *)pHead , sizeof( IPC_HEADER )- 2 );
-	RJMP _0x20A0009
+	RJMP _0x20A000A
 ; 0003 0292 
 ; 0003 0293    IPC_SendData0( (BYTE *)pHead, sizeof( IPC_HEADER ) );
 ; 0003 0294    return TRUE;
@@ -3454,7 +3458,7 @@ _IPC0_SND_RUN:
 ; 0003 029B    pHead->data2 = (BYTE)(gRunFlag&0xff);
 ; 0003 029C 
 ; 0003 029D    pHead->checksum = MakeCrc( (BYTE *)pHead , sizeof( IPC_HEADER )- 2 );
-	RJMP _0x20A0009
+	RJMP _0x20A000A
 ; 0003 029E 
 ; 0003 029F    IPC_SendData0( (BYTE *)pHead, sizeof( IPC_HEADER ) );
 ; 0003 02A0    return TRUE;
@@ -3473,7 +3477,7 @@ _IPC0_SND_DOSE:
 ; 0003 02A7    pHead->data2 = (BYTE)(gDose&0xff);
 ; 0003 02A8 
 ; 0003 02A9    pHead->checksum = MakeCrc( (BYTE *)pHead , sizeof( IPC_HEADER )- 2 );
-	RJMP _0x20A0009
+	RJMP _0x20A000A
 ; 0003 02AA 
 ; 0003 02AB    IPC_SendData0( (BYTE *)pHead, sizeof( IPC_HEADER ) );
 ; 0003 02AC    return TRUE;
@@ -3491,7 +3495,7 @@ _IPC0_SND_VOLTAGE:
 ; 0003 02B2    pHead->data2 = (BYTE)(gVoltage&0xff);
 ; 0003 02B3 
 ; 0003 02B4    pHead->checksum = MakeCrc( (BYTE *)pHead , sizeof( IPC_HEADER )- 2 );
-	RJMP _0x20A0009
+	RJMP _0x20A000A
 ; 0003 02B5 
 ; 0003 02B6    IPC_SendData0( (BYTE *)pHead, sizeof( IPC_HEADER ) );
 ; 0003 02B7 
@@ -3511,7 +3515,7 @@ _IPC0_SND_DEPTH:
 ; 0003 02BF    pHead->data2 = (BYTE)(gDepth&0xff);
 ; 0003 02C0 
 ; 0003 02C1    pHead->checksum = MakeCrc( (BYTE *)pHead , sizeof( IPC_HEADER )- 2 );
-	RJMP _0x20A0009
+	RJMP _0x20A000A
 ; 0003 02C2 
 ; 0003 02C3    IPC_SendData0( (BYTE *)pHead, sizeof( IPC_HEADER ) );
 ; 0003 02C4 
@@ -3532,7 +3536,7 @@ _IPC0_SND_ELCOUNT:
 ; 0003 02CD    pHead->data2 = (BYTE)(gElCount&0xff);
 ; 0003 02CE 
 ; 0003 02CF    pHead->checksum = MakeCrc( (BYTE *)pHead , sizeof( IPC_HEADER )- 2 );
-	RJMP _0x20A0009
+	RJMP _0x20A000A
 ; 0003 02D0 
 ; 0003 02D1    IPC_SendData0( (BYTE *)pHead, sizeof( IPC_HEADER ) );
 ; 0003 02D2    return TRUE;
@@ -3551,7 +3555,7 @@ _IPC0_SND_SPEED:
 ; 0003 02D9    pHead->data2 = (BYTE)(gSpeed&0xff);
 ; 0003 02DA 
 ; 0003 02DB    pHead->checksum = MakeCrc( (BYTE *)pHead , sizeof( IPC_HEADER )- 2 );
-	RJMP _0x20A0009
+	RJMP _0x20A000A
 ; 0003 02DC 
 ; 0003 02DD    IPC_SendData0( (BYTE *)pHead, sizeof( IPC_HEADER ) );
 ; 0003 02DE    return TRUE;
@@ -3576,7 +3580,7 @@ _IPC0_SND_FLAG:
 	CALL SUBOPT_0x20
 ; 0003 02E8 
 ; 0003 02E9    pHead->checksum = MakeCrc( (BYTE *)pHead , sizeof( IPC_HEADER )- 2 );
-	RJMP _0x20A0009
+	RJMP _0x20A000A
 ; 0003 02EA 
 ; 0003 02EB    IPC_SendData0( (BYTE *)pHead, sizeof( IPC_HEADER ) );
 ; 0003 02EC 
@@ -3597,7 +3601,7 @@ _IPC0_SND_EL_MAP:
 ; 0003 02F5    pHead->data2 = 0;
 ; 0003 02F6 
 ; 0003 02F7    pHead->checksum = MakeCrc( (BYTE *)pHead , sizeof( IPC_HEADER )- 2 );
-	RJMP _0x20A0009
+	RJMP _0x20A000A
 ; 0003 02F8 
 ; 0003 02F9    IPC_SendData0( (BYTE *)pHead, sizeof( IPC_HEADER ) );
 ; 0003 02FA 
@@ -3618,7 +3622,7 @@ _IPC0_SND_MOTOR_POS1:
 ; 0003 0303    pHead->data2 = 0;
 ; 0003 0304 
 ; 0003 0305    pHead->checksum = MakeCrc( (BYTE *)pHead , sizeof( IPC_HEADER )- 2 );
-	RJMP _0x20A0009
+	RJMP _0x20A000A
 ; 0003 0306 
 ; 0003 0307    IPC_SendData0( (BYTE *)pHead, sizeof( IPC_HEADER ) );
 ; 0003 0308 
@@ -3638,7 +3642,7 @@ _IPC0_SND_MOTOR_POS2:
 ; 0003 0310    pHead->data2 = 0;
 ; 0003 0311 
 ; 0003 0312    pHead->checksum = MakeCrc( (BYTE *)pHead , sizeof( IPC_HEADER )- 2 );
-	RJMP _0x20A0009
+	RJMP _0x20A000A
 ; 0003 0313 
 ; 0003 0314    IPC_SendData0( (BYTE *)pHead, sizeof( IPC_HEADER ) );
 ; 0003 0315 
@@ -3675,7 +3679,7 @@ _0x6003E:
 ; 0003 0321 
 ; 0003 0322    pHead->checksum = MakeCrc( (BYTE *)pHead , sizeof( IPC_HEADER )- 2 );
 _0x6003F:
-_0x20A0009:
+_0x20A000A:
 	LD   R30,Y
 	LDD  R31,Y+1
 	ST   -Y,R31
@@ -3687,9 +3691,9 @@ _0x20A0009:
 	CALL _IPC_SendData0
 ; 0003 0325 
 ; 0003 0326    return TRUE;
-_0x20A000A:
-	LDI  R30,LOW(1)
 _0x20A000B:
+	LDI  R30,LOW(1)
+_0x20A000C:
 	ADIW R28,2
 	RET
 ; 0003 0327 
@@ -3774,7 +3778,7 @@ _0x60045:
 ; 0003 0346      }
 ; 0003 0347 
 ; 0003 0348 }
-_0x20A0008:
+_0x20A0009:
 	CALL __LOADLOCR6
 	ADIW R28,36
 	RET
@@ -3799,9 +3803,11 @@ _IPC_Send_Response0:
 ; 0003 0354      IPC_SendData0( Data, sizeof( IPC_HEADER ) );
 	CALL _IPC_SendData0
 ; 0003 0355 }
+_0x20A0008:
 	LDD  R17,Y+1
 	LDD  R16,Y+0
-	JMP  _0x20A0001
+	ADIW R28,5
+	RET
 ; .FEND
 ;
 ;void IPC_RcvProcess0( BYTE *Data )
@@ -4740,9 +4746,7 @@ _0xC0003:
 ; 0006 001A 
 ; 0006 001B   return RetVal;
 	CALL __LOADLOCR4
-_0x20A0001:
-	ADIW R28,5
-	RET
+	JMP  _0x20A0001
 ; 0006 001C }
 ; .FEND
 ;#include <mega128.h>
@@ -4794,6 +4798,17 @@ _0x20A0001:
 ;int  gCalValue0,gCalValue1;
 ;int  gDutyOff=0;
 ;BOOL gElCompletFlag = FALSE;
+;
+;//add yjw 2021.04.03
+;BYTE gShotCnt =0;
+;int gShotWaitTime =0;
+;int gShotGapWaitTime =0;
+;
+;int gSetVolagteInitTime = 5000;
+
+	.DSEG
+;
+;
 ;int  gShift=0;
 ;//int  gReadVol;
 ;int  gVolAdjCount=0;
@@ -4811,7 +4826,7 @@ _0x20A0001:
 ;
 ;// Timer 0 overflow interrupt service routine
 ;interrupt [TIM0_OVF] void timer0_ovf_isr(void)
-; 0007 0038 {
+; 0007 0041 {
 
 	.CSEG
 _timer0_ovf_isr:
@@ -4822,16 +4837,16 @@ _timer0_ovf_isr:
 	ST   -Y,R31
 	IN   R30,SREG
 	ST   -Y,R30
-; 0007 0039     // Reinitialize Timer 0 value
-; 0007 003A     TCNT0 = 0x06;   //1ms
+; 0007 0042     // Reinitialize Timer 0 value
+; 0007 0043     TCNT0 = 0x06;   //1ms
 	LDI  R30,LOW(6)
 	OUT  0x32,R30
-; 0007 003B     // Place your code here
-; 0007 003C     gTime1ms++;
+; 0007 0044     // Place your code here
+; 0007 0045     gTime1ms++;
 	LDI  R26,LOW(_gTime1ms)
 	LDI  R27,HIGH(_gTime1ms)
 	CALL SUBOPT_0x35
-; 0007 003D }
+; 0007 0046 }
 	LD   R30,Y+
 	OUT  SREG,R30
 	LD   R31,Y+
@@ -4841,790 +4856,508 @@ _timer0_ovf_isr:
 	RETI
 ; .FEND
 ;
-;void PulseGenerator1( void )
-; 0007 0040 {
-; 0007 0041    // Reinitialize Timer1 value
-; 0007 0042     TCNT1H=0xB1E0 >> 8;           //10ms
-; 0007 0043     TCNT1L=0xB1E0 & 0xff;
-; 0007 0044 
-; 0007 0045     // Place your code here
-; 0007 0046     if( gRunFlag==TRUE && gElCompletFlag == FALSE )
-; 0007 0047     {
-; 0007 0048        if( gCurState == 0 )
-; 0007 0049        {
-; 0007 004A           gCalValue0 = gElMatrix[gElLoc]<<4 |(~gElMatrix[gElLoc])&0x0f; //((~gElMatrix[gElLoc]<<4)&0xf0)| gElMatrix[gElL ...
-; 0007 004B           gCalValue1 = gCalValue0&0x0f; // (~gElMatrix[gElLoc])&0x0f;
+;void PulseGenerator( void )
+; 0007 0049 {
+_PulseGenerator:
+; .FSTART _PulseGenerator
+; 0007 004A     int i=0;
+; 0007 004B     // Reinitialize Timer1 value
 ; 0007 004C 
-; 0007 004D           PORTC = gCalValue0;
-; 0007 004E           gCurState = 1;
-; 0007 004F        }
-; 0007 0050        else if( gCurState == 1 )
-; 0007 0051        {
-; 0007 0052           PORTC = gCalValue1;
-; 0007 0053           gCurState = 2;
-; 0007 0054        }
-; 0007 0055        else if( gCurState == 2 )
-; 0007 0056        {
-; 0007 0057           PORTC = gCalValue0;
-; 0007 0058           gCurState = 3;
-; 0007 0059        }
-; 0007 005A        else if( gCurState == 3 )
-; 0007 005B        {
-; 0007 005C           PORTC = gCalValue1;
-; 0007 005D           gCurState = 4;
-; 0007 005E        }
-; 0007 005F        else if( gCurState == 4 )
-; 0007 0060        {
-; 0007 0061           PORTC = gCalValue0;
-; 0007 0062           gCurState = 5;
-; 0007 0063        }
-; 0007 0064        else if( gCurState == 5 )
-; 0007 0065        {
-; 0007 0066           gDutyOff = 0;
-; 0007 0067           PORTC = gCalValue1;
-; 0007 0068           gCurState = 6;
-; 0007 0069        }
-; 0007 006A        else if( gCurState == 6 )
-; 0007 006B        {
-; 0007 006C           gDutyOff++;
-; 0007 006D           if( gDutyOff >8)
-; 0007 006E           {
-; 0007 006F              gCurState = 0;
-; 0007 0070              gElLoc++;
-; 0007 0071              if( gElLoc > 3 )
-; 0007 0072              {
-; 0007 0073                 PORTC = 0;
-; 0007 0074                 gElLoc = 0;
-; 0007 0075                 gElCompletFlag = TRUE;
-; 0007 0076              }
-; 0007 0077           }
-; 0007 0078        }
-; 0007 0079    }
-; 0007 007A }
-;
-;void PulseGenerator2( void )
-; 0007 007D {
-; 0007 007E      // Reinitialize Timer1 value
-; 0007 007F     TCNT1H=0xE013 >> 8;          //     0.4ms
-; 0007 0080     TCNT1L=0xE013 & 0xff;
-; 0007 0081 
-; 0007 0082     // Place your code here
-; 0007 0083     if( gRunFlag==TRUE && gElCompletFlag == FALSE )
-; 0007 0084     {
-; 0007 0085        if( gCurState == 0 )
-; 0007 0086        {
-; 0007 0087           gCalValue0 = gElMatrix[gElLoc]<<4 |(~gElMatrix[gElLoc])&0x0f; //((~gElMatrix[gElLoc]<<4)&0xf0)| gElMatrix[gElL ...
-; 0007 0088           gCalValue1 = gCalValue0&0x0f; // (~gElMatrix[gElLoc])&0x0f;
-; 0007 0089 
-; 0007 008A           PORTC = gCalValue0;
-; 0007 008B           gDutyOff = 0;
-; 0007 008C           gCurState = 1;
-; 0007 008D        }
-; 0007 008E        else if( gCurState == 1 )
-; 0007 008F        {
-; 0007 0090           gDutyOff++;
-; 0007 0091           if( gDutyOff >10 ) gCurState = 2;
-; 0007 0092        }
-; 0007 0093        else if( gCurState == 2 )
-; 0007 0094        {
-; 0007 0095           gDutyOff = 0;
-; 0007 0096           PORTC = gCalValue1;
-; 0007 0097           gCurState = 3;
-; 0007 0098        }
-; 0007 0099        else if( gCurState == 3 )
-; 0007 009A        {
-; 0007 009B           PORTC = gCalValue0;
-; 0007 009C           gDutyOff++;
-; 0007 009D           if( gDutyOff >11) gCurState = 4;
-; 0007 009E        }
-; 0007 009F        else if( gCurState == 4 )
-; 0007 00A0        {
-; 0007 00A1           gDutyOff = 0;
-; 0007 00A2           PORTC = gCalValue1;
-; 0007 00A3           gCurState = 5;
-; 0007 00A4        }
-; 0007 00A5        else if( gCurState == 5 )
-; 0007 00A6        {
-; 0007 00A7           gDutyOff++;
-; 0007 00A8           if( gDutyOff >297)     //150ms
-; 0007 00A9           {
-; 0007 00AA              gCurState = 0;
-; 0007 00AB              gElLoc++;
-; 0007 00AC              if( gElLoc > 3 )
-; 0007 00AD              {
-; 0007 00AE                 PORTC = 0x00;
-; 0007 00AF                 gElLoc = 0;
-; 0007 00B0                 gElCompletFlag = TRUE;
-; 0007 00B1              }
-; 0007 00B2           }
-; 0007 00B3        }
-; 0007 00B4    }
-; 0007 00B5 }
-;
-;void PulseGenerator3( void )
-; 0007 00B8 {
-; 0007 00B9    // Reinitialize Timer1 value
-; 0007 00BA     TCNT1H=0xE700 >> 8;          //     0.4ms
-; 0007 00BB     TCNT1L=0xE700 & 0xff;
-; 0007 00BC 
-; 0007 00BD     // Place your code here
-; 0007 00BE     if( gRunFlag==TRUE && gElCompletFlag == FALSE )
-; 0007 00BF     {
-; 0007 00C0        if( gCurState == 0 )
-; 0007 00C1        {
-; 0007 00C2           gCalValue0 = gElMatrix[gElLoc]<<4 |(~gElMatrix[gElLoc])&0x0f; //((~gElMatrix[gElLoc]<<4)&0xf0)| gElMatrix[gElL ...
-; 0007 00C3           gCalValue1 = gCalValue0&0x0f; // (~gElMatrix[gElLoc])&0x0f;
-; 0007 00C4 
-; 0007 00C5           PORTC = gCalValue0;
-; 0007 00C6           gDutyOff = 0;
-; 0007 00C7 
-; 0007 00C8           gCurState = 1;
-; 0007 00C9        }
-; 0007 00CA        else if( gCurState == 1 )
-; 0007 00CB        {
-; 0007 00CC           gDutyOff++;
-; 0007 00CD           if( gDutyOff >47 )gCurState = 2;
-; 0007 00CE 
-; 0007 00CF        }
-; 0007 00D0        else if( gCurState == 2 )
-; 0007 00D1        {
-; 0007 00D2           gDutyOff = 0;
-; 0007 00D3           PORTC = gCalValue1;
-; 0007 00D4           gCurState = 3;
-; 0007 00D5        }
-; 0007 00D6        else if( gCurState == 3 )
-; 0007 00D7        {
-; 0007 00D8            PORTC = gCalValue0;
-; 0007 00D9            gDutyOff++;
-; 0007 00DA            if( gDutyOff >47 )gCurState = 4;
-; 0007 00DB        }
-; 0007 00DC        else if( gCurState == 4 )
-; 0007 00DD        {
-; 0007 00DE           gDutyOff = 0;
-; 0007 00DF           PORTC = gCalValue1;
-; 0007 00E0           gCurState = 5;
-; 0007 00E1        }
-; 0007 00E2        else if( gCurState == 5 )
-; 0007 00E3        {
-; 0007 00E4           PORTC = gCalValue0;
-; 0007 00E5           gDutyOff++;
-; 0007 00E6           if( gDutyOff >47 ) gCurState = 6;
-; 0007 00E7        }
-; 0007 00E8        else if( gCurState == 6 )
-; 0007 00E9        {
-; 0007 00EA           gDutyOff = 0;
-; 0007 00EB           PORTC = gCalValue1;
-; 0007 00EC           gCurState = 7;
-; 0007 00ED        }
-; 0007 00EE        else if( gCurState == 7 )
-; 0007 00EF        {
-; 0007 00F0           gDutyOff++;
-; 0007 00F1           if( gDutyOff >246)
-; 0007 00F2           {
-; 0007 00F3              gCurState = 0;
-; 0007 00F4              gElLoc++;
-; 0007 00F5              if( gElLoc > 3 )
-; 0007 00F6              {
-; 0007 00F7                 PORTC = 0;
-; 0007 00F8                 gElLoc = 0;
-; 0007 00F9                 gElCompletFlag = TRUE;
-; 0007 00FA              }
-; 0007 00FB           }
-; 0007 00FC        }
-; 0007 00FD    }
-; 0007 00FE }
-;
-;void PulseGenerator4( void )
-; 0007 0101 {
-; 0007 0102      // Reinitialize Timer1 value
-; 0007 0103     TCNT1H=0xE013 >> 8;          //     0.4ms
-; 0007 0104     TCNT1L=0xE013 & 0xff;
-; 0007 0105 
-; 0007 0106     // Place your code here
-; 0007 0107     if( gRunFlag==TRUE && gElCompletFlag == FALSE )
-; 0007 0108     {
-; 0007 0109        if( gCurState == 0 )
-; 0007 010A        {
-; 0007 010B           gCalValue0 = gElMatrix[gElLoc]<<4 |(~gElMatrix[gElLoc])&0x0f; //((~gElMatrix[gElLoc]<<4)&0xf0)| gElMatrix[gElL ...
-; 0007 010C           gCalValue1 = gCalValue0&0x0f; // (~gElMatrix[gElLoc])&0x0f;
-; 0007 010D 
-; 0007 010E           PORTC = gCalValue0;
-; 0007 010F           gDutyOff = 0;
-; 0007 0110           gCurState = 1;
-; 0007 0111        }
-; 0007 0112        else if( gCurState == 1 )
-; 0007 0113        {
-; 0007 0114           gDutyOff++;
-; 0007 0115           if( gDutyOff >11 )gCurState = 2;
-; 0007 0116        }
-; 0007 0117        else if( gCurState == 2 )
-; 0007 0118        {
-; 0007 0119           gDutyOff = 0;
-; 0007 011A           PORTC = gCalValue1;
-; 0007 011B           gCurState = 3;
-; 0007 011C        }
-; 0007 011D        else if( gCurState == 3 )
-; 0007 011E        {
-; 0007 011F           PORTC = gCalValue0;
-; 0007 0120           gDutyOff++;
-; 0007 0121           if( gDutyOff >11) gCurState = 4;
-; 0007 0122        }
-; 0007 0123        else if( gCurState == 4 )
-; 0007 0124        {
-; 0007 0125           gDutyOff = 0;
-; 0007 0126           PORTC = gCalValue1;
-; 0007 0127           gCurState = 5;
-; 0007 0128        }
-; 0007 0129        else if( gCurState == 5 )
-; 0007 012A        {
-; 0007 012B           PORTC = gCalValue0;
-; 0007 012C           gDutyOff++;
-; 0007 012D           if( gDutyOff >11) gCurState = 6;
-; 0007 012E        }
-; 0007 012F        else if( gCurState == 6 )
-; 0007 0130        {
-; 0007 0131           gDutyOff = 0;
-; 0007 0132           PORTC = gCalValue1;
-; 0007 0133           gCurState = 7;
-; 0007 0134        }
-; 0007 0135        else if( gCurState == 7 )
-; 0007 0136        {
-; 0007 0137           PORTC = gCalValue0;
-; 0007 0138           gDutyOff++;
-; 0007 0139           if( gDutyOff >11) gCurState = 8;
-; 0007 013A        }
-; 0007 013B        else if( gCurState == 8 )
-; 0007 013C        {
-; 0007 013D           gDutyOff = 0;
-; 0007 013E           PORTC = gCalValue1;
-; 0007 013F           gCurState = 9;
-; 0007 0140        }
-; 0007 0141        else if( gCurState == 9 )
-; 0007 0142        {
-; 0007 0143           PORTC = gCalValue0;
-; 0007 0144           gDutyOff++;
-; 0007 0145           if( gDutyOff >11) gCurState = 10;
-; 0007 0146        }
-; 0007 0147        else if( gCurState == 10 )
-; 0007 0148        {
-; 0007 0149           gDutyOff = 0;
-; 0007 014A           PORTC = gCalValue1;
-; 0007 014B           gCurState = 11;
-; 0007 014C        }
-; 0007 014D        else if( gCurState == 11 )
-; 0007 014E        {
-; 0007 014F           gDutyOff++;
-; 0007 0150           if( gDutyOff >294)     //150ms
-; 0007 0151           {
-; 0007 0152              gCurState = 0;
-; 0007 0153              gElLoc++;
-; 0007 0154              if( gElLoc > 3 )
-; 0007 0155              {
-; 0007 0156                 PORTC = 0x00;
-; 0007 0157                 gElLoc = 0;
-; 0007 0158                 gElCompletFlag = TRUE;
-; 0007 0159              }
-; 0007 015A           }
-; 0007 015B        }
-; 0007 015C    }
-; 0007 015D }
-;
-;void PulseGenerator5( void )
-; 0007 0160 {
-_PulseGenerator5:
-; .FSTART _PulseGenerator5
-; 0007 0161     int i=0;
-; 0007 0162     // Reinitialize Timer1 value
-; 0007 0163 
-; 0007 0164     #if 0
-; 0007 0165     TCNT1H=0xB1E0 >> 8;           //10ms
-; 0007 0166     TCNT1L=0xB1E0 & 0xff;
-; 0007 0167     #else
-; 0007 0168     TCNT1H=0xC1;
+; 0007 004D     #if 0
+; 0007 004E     TCNT1H=0xB1E0 >> 8;           //10ms
+; 0007 004F     TCNT1L=0xB1E0 & 0xff;
+; 0007 0050     #else
+; 0007 0051     TCNT1H=0xE0;    //0.5ms
 	CALL SUBOPT_0x0
 ;	i -> R16,R17
-	LDI  R30,LOW(193)
-	OUT  0x2D,R30
-; 0007 0169     TCNT1L=0x80;
-	LDI  R30,LOW(128)
-	OUT  0x2C,R30
-; 0007 016A     #endif
-; 0007 016B 
-; 0007 016C     // Place your code here
-; 0007 016D     if( gRunFlag==TRUE && gElCompletFlag == FALSE )
+	CALL SUBOPT_0x36
+; 0007 0052     TCNT1L=0xC0;
+; 0007 0053     #endif
+; 0007 0054 
+; 0007 0055     // Place your code here
+; 0007 0056     if( gRunFlag==TRUE && gElCompletFlag == FALSE )
 	LDS  R26,_gRunFlag
 	CPI  R26,LOW(0x1)
-	BRNE _0xE0060
+	BRNE _0xE0005
 	LDS  R26,_gElCompletFlag
 	CPI  R26,LOW(0x0)
-	BREQ _0xE0061
-_0xE0060:
-	RJMP _0xE005F
-_0xE0061:
-; 0007 016E     {
-; 0007 016F        if( gCurState == 0 )
+	BREQ _0xE0006
+_0xE0005:
+	RJMP _0xE0004
+_0xE0006:
+; 0007 0057     {
+; 0007 0058 
+; 0007 0059         if( gGenMode==FALSE )
+	LDS  R30,_gGenMode
+	CPI  R30,0
+	BREQ PC+2
+	RJMP _0xE0007
+; 0007 005A         {
+; 0007 005B             if(gShotWaitTime<=800)  //0.5ms * 800 = 400ms
+	LDS  R26,_gShotWaitTime
+	LDS  R27,_gShotWaitTime+1
+	CPI  R26,LOW(0x321)
+	LDI  R30,HIGH(0x321)
+	CPC  R27,R30
+	BRGE _0xE0008
+; 0007 005C             {
+; 0007 005D                  gShotWaitTime++;
+	LDI  R26,LOW(_gShotWaitTime)
+	LDI  R27,HIGH(_gShotWaitTime)
+	CALL SUBOPT_0x35
+; 0007 005E             }
+; 0007 005F             else
+	RJMP _0xE0009
+_0xE0008:
+; 0007 0060             {
+; 0007 0061                 if( gCurState == 0 )
 	LDS  R30,_gCurState
 	LDS  R31,_gCurState+1
 	SBIW R30,0
-	BRNE _0xE0062
-; 0007 0170        {
-; 0007 0171          // gCalValue0 = gElMatrix[gElLoc]<<4 |(~gElMatrix[gElLoc])&0x0f; //((~gElMatrix[gElLoc]<<4)&0xf0)| gElMatrix[gE ...
-; 0007 0172          // gCalValue1 = gCalValue0&0x0f; // (~gElMatrix[gElLoc])&0x0f;
-; 0007 0173           gCalValue0 = gElMatrix[gElLoc]<<4;
-	CALL SUBOPT_0x36
-	LD   R30,Z
-	SWAP R30
-	ANDI R30,0xF0
-	LDI  R31,0
-	STS  _gCalValue0,R30
-	STS  _gCalValue0+1,R31
-; 0007 0174           gCalValue1 = 0;
-	LDI  R30,LOW(0)
-	STS  _gCalValue1,R30
-	STS  _gCalValue1+1,R30
-; 0007 0175 
-; 0007 0176           for( i=0; i< 4; i++)
-	__GETWRN 16,17,0
-_0xE0064:
+	BRNE _0xE000A
+; 0007 0062                 {
+; 0007 0063                     gCalValue0 = gElMatrix[gElLoc]<<4;
+	CALL SUBOPT_0x37
+	CALL SUBOPT_0x38
+; 0007 0064                     gCalValue1 = 0;
+; 0007 0065 
+; 0007 0066                     for( i=0; i< 4; i++)
+_0xE000C:
 	__CPWRN 16,17,4
-	BRGE _0xE0065
-; 0007 0177           {
-; 0007 0178              if( gElMatrix[gElLoc]&(0x08>>i))
-	CALL SUBOPT_0x36
-	LD   R1,Z
-	MOV  R30,R16
-	LDI  R26,LOW(8)
-	CALL __LSRB12
-	AND  R30,R1
-	BRNE _0xE0065
-; 0007 0179               break;
-; 0007 017A           }
+	BRGE _0xE000D
+; 0007 0067                     {
+; 0007 0068                         if( gElMatrix[gElLoc]&(0x08>>i))
+	CALL SUBOPT_0x37
+	CALL SUBOPT_0x39
+	BRNE _0xE000D
+; 0007 0069                         break;
+; 0007 006A                     }
 	__ADDWRN 16,17,1
-	RJMP _0xE0064
-_0xE0065:
-; 0007 017B           gShift = i;
-	__PUTWMRN _gShift,0,16,17
-; 0007 017C 
-; 0007 017D           gShift++;
-	CALL SUBOPT_0x37
-; 0007 017E           if( gShift > 3 ) gShift = 0;
-	CALL SUBOPT_0x38
-	BRLT _0xE0067
-	CALL SUBOPT_0x39
-; 0007 017F 
-; 0007 0180           PORTC = gCalValue0|(0x08>>gShift);
-_0xE0067:
+	RJMP _0xE000C
+_0xE000D:
+; 0007 006B                     gShift = i;
 	CALL SUBOPT_0x3A
-; 0007 0181           gCurState = 1;
+; 0007 006C 
+; 0007 006D                     gShift++;
+; 0007 006E                     if( gShift > 3 ) gShift = 0;
 	CALL SUBOPT_0x3B
-; 0007 0182        }
-; 0007 0183        else if( gCurState == 1 )
-	RJMP _0xE0068
-_0xE0062:
+	BRLT _0xE000F
 	CALL SUBOPT_0x3C
-	SBIW R26,1
-	BRNE _0xE0069
-; 0007 0184        {
-; 0007 0185           PORTC = gCalValue1;
-	LDS  R30,_gCalValue1
-	OUT  0x15,R30
-; 0007 0186           gCurState = 2;
+; 0007 006F 
+; 0007 0070                     PORTC = gCalValue0|(0x08>>gShift);
+_0xE000F:
 	CALL SUBOPT_0x3D
-; 0007 0187        }
-; 0007 0188        else if( gCurState == 2 )
-	RJMP _0xE006A
-_0xE0069:
-	CALL SUBOPT_0x3C
-	SBIW R26,2
-	BRNE _0xE006B
-; 0007 0189        {
-; 0007 018A           gShift++;
-	CALL SUBOPT_0x37
-; 0007 018B           if( gShift > 3 ) gShift = 0;
-	CALL SUBOPT_0x38
-	BRLT _0xE006C
-	CALL SUBOPT_0x39
-; 0007 018C           PORTC = gCalValue0|(0x08>>gShift);
-_0xE006C:
-	CALL SUBOPT_0x3A
-; 0007 018D           gCurState = 3;
+; 0007 0071                     gCurState = 1;
 	CALL SUBOPT_0x3E
-; 0007 018E        }
-; 0007 018F        else if( gCurState == 3 )
-	RJMP _0xE006D
-_0xE006B:
-	CALL SUBOPT_0x3C
-	SBIW R26,3
-	BRNE _0xE006E
-; 0007 0190        {
-; 0007 0191           PORTC = gCalValue1;
-	LDS  R30,_gCalValue1
-	OUT  0x15,R30
-; 0007 0192           gCurState = 4;
+; 0007 0072                 }
+; 0007 0073                 else if( gCurState == 1 )
+	RJMP _0xE0010
+_0xE000A:
 	CALL SUBOPT_0x3F
-; 0007 0193        }
-; 0007 0194        else if( gCurState == 4 )
-	RJMP _0xE006F
-_0xE006E:
-	CALL SUBOPT_0x3C
-	SBIW R26,4
-	BRNE _0xE0070
-; 0007 0195        {
-; 0007 0196           gShift++;
-	CALL SUBOPT_0x37
-; 0007 0197           if( gShift > 3 ) gShift = 0;
-	CALL SUBOPT_0x38
-	BRLT _0xE0071
-	CALL SUBOPT_0x39
-; 0007 0198           PORTC = gCalValue0|(0x08>>gShift);
-_0xE0071:
-	CALL SUBOPT_0x3A
-; 0007 0199           gCurState = 5;
+	SBIW R26,1
+	BRNE _0xE0011
+; 0007 0074                 {
+; 0007 0075                     PORTC = gCalValue1;
 	CALL SUBOPT_0x40
-; 0007 019A        }
-; 0007 019B        else if( gCurState == 5 )
-	RJMP _0xE0072
-_0xE0070:
-	CALL SUBOPT_0x3C
-	SBIW R26,5
-	BRNE _0xE0073
-; 0007 019C        {
-; 0007 019D           gDutyOff = 0;
+; 0007 0076                     gCurState = 2;
+; 0007 0077                 }
+; 0007 0078                 else if( gCurState == 2 )
+	RJMP _0xE0012
+_0xE0011:
+	CALL SUBOPT_0x3F
+	SBIW R26,2
+	BRNE _0xE0013
+; 0007 0079                 {
+; 0007 007A                     gShift++;
 	CALL SUBOPT_0x41
-; 0007 019E           PORTC = gCalValue1;
-	LDS  R30,_gCalValue1
-	OUT  0x15,R30
-; 0007 019F           gCurState = 6;
-	CALL SUBOPT_0x42
-; 0007 01A0        }
-; 0007 01A1        else if( gCurState == 6 )
-	RJMP _0xE0074
-_0xE0073:
+; 0007 007B                     if( gShift > 3 ) gShift = 0;
+	CALL SUBOPT_0x3B
+	BRLT _0xE0014
 	CALL SUBOPT_0x3C
-	SBIW R26,6
-	BRNE _0xE0075
-; 0007 01A2        {
-; 0007 01A3           gDutyOff++;
+; 0007 007C                     PORTC = gCalValue0|(0x08>>gShift);
+_0xE0014:
+	CALL SUBOPT_0x3D
+; 0007 007D                     gCurState = 3;
+	CALL SUBOPT_0x42
+; 0007 007E                 }
+; 0007 007F                 else if( gCurState == 3 )
+	RJMP _0xE0015
+_0xE0013:
+	CALL SUBOPT_0x3F
+	SBIW R26,3
+	BRNE _0xE0016
+; 0007 0080                 {
+; 0007 0081                     PORTC = gCalValue1;
 	CALL SUBOPT_0x43
-; 0007 01A4           if( gDutyOff >8)
+; 0007 0082                     gCurState = 4;
+; 0007 0083                 }
+; 0007 0084                 else if( gCurState == 4 )
+	RJMP _0xE0017
+_0xE0016:
+	CALL SUBOPT_0x3F
+	SBIW R26,4
+	BRNE _0xE0018
+; 0007 0085                 {
+; 0007 0086                     gShift++;
+	CALL SUBOPT_0x41
+; 0007 0087                     if( gShift > 3 ) gShift = 0;
+	CALL SUBOPT_0x3B
+	BRLT _0xE0019
+	CALL SUBOPT_0x3C
+; 0007 0088                     PORTC = gCalValue0|(0x08>>gShift);
+_0xE0019:
+	CALL SUBOPT_0x3D
+; 0007 0089                     gCurState = 5;
 	CALL SUBOPT_0x44
-	SBIW R26,9
-	BRLT _0xE0076
-; 0007 01A5           {
-; 0007 01A6              gCurState = 0;
+; 0007 008A                 }
+; 0007 008B                 else if( gCurState == 5 )
+	RJMP _0xE001A
+_0xE0018:
+	CALL SUBOPT_0x3F
+	SBIW R26,5
+	BRNE _0xE001B
+; 0007 008C                 {
+; 0007 008D                     PORTC = gCalValue1;
 	CALL SUBOPT_0x45
-; 0007 01A7              gElLoc++;
-; 0007 01A8              if( gElLoc > 3 )
+; 0007 008E                     gElLoc++;
+; 0007 008F                     if( gElLoc > 3 )
 	LDS  R26,_gElLoc
 	LDS  R27,_gElLoc+1
 	SBIW R26,4
-	BRLT _0xE0077
-; 0007 01A9              {
-; 0007 01AA                 PORTC = 0;
+	BRLT _0xE001C
+; 0007 0090                     {
+; 0007 0091                         gShotCnt++;
 	CALL SUBOPT_0x46
-; 0007 01AB                 gElLoc = 0;
-; 0007 01AC                 gElCompletFlag = TRUE;
-; 0007 01AD              }
-; 0007 01AE           }
-_0xE0077:
-; 0007 01AF        }
-_0xE0076:
-; 0007 01B0    }
-_0xE0075:
-_0xE0074:
-_0xE0072:
-_0xE006F:
-_0xE006D:
-_0xE006A:
-_0xE0068:
-; 0007 01B1 }
-_0xE005F:
+; 0007 0092                         gElLoc = 0;
+; 0007 0093                     }
+; 0007 0094                     gCurState = 0;
+_0xE001C:
+	LDI  R30,LOW(0)
+	STS  _gCurState,R30
+	STS  _gCurState+1,R30
+; 0007 0095 
+; 0007 0096                     if(gShotCnt >=1)      //1CYCLE
+	LDS  R26,_gShotCnt
+	CPI  R26,LOW(0x1)
+	BRLO _0xE001D
+; 0007 0097                     {
+; 0007 0098                         gShotCnt = 0;
+	CALL SUBOPT_0x47
+; 0007 0099                         gShotWaitTime = 0;
+; 0007 009A                         gElCompletFlag = TRUE;
+; 0007 009B                     }
+; 0007 009C                 }
+_0xE001D:
+; 0007 009D             }
+_0xE001B:
+_0xE001A:
+_0xE0017:
+_0xE0015:
+_0xE0012:
+_0xE0010:
+_0xE0009:
+; 0007 009E         }
+; 0007 009F         else
+	RJMP _0xE001E
+_0xE0007:
+; 0007 00A0         {
+; 0007 00A1 
+; 0007 00A2           if(gShotWaitTime<=400)  //0.5ms * 400 = 200ms
+	LDS  R26,_gShotWaitTime
+	LDS  R27,_gShotWaitTime+1
+	CPI  R26,LOW(0x191)
+	LDI  R30,HIGH(0x191)
+	CPC  R27,R30
+	BRGE _0xE001F
+; 0007 00A3             {
+; 0007 00A4                  gShotWaitTime++;
+	LDI  R26,LOW(_gShotWaitTime)
+	LDI  R27,HIGH(_gShotWaitTime)
+	CALL SUBOPT_0x35
+; 0007 00A5                  gShotGapWaitTime = 0;
+	LDI  R30,LOW(0)
+	STS  _gShotGapWaitTime,R30
+	STS  _gShotGapWaitTime+1,R30
+; 0007 00A6             }
+; 0007 00A7             else
+	RJMP _0xE0020
+_0xE001F:
+; 0007 00A8             {
+; 0007 00A9                 if(gShotGapWaitTime)
+	LDS  R30,_gShotGapWaitTime
+	LDS  R31,_gShotGapWaitTime+1
+	SBIW R30,0
+	BREQ _0xE0021
+; 0007 00AA                 {
+; 0007 00AB                     gShotGapWaitTime --;
+	LDI  R26,LOW(_gShotGapWaitTime)
+	LDI  R27,HIGH(_gShotGapWaitTime)
+	CALL SUBOPT_0x48
+; 0007 00AC                 }
+; 0007 00AD                 else
+	RJMP _0xE0022
+_0xE0021:
+; 0007 00AE                 {
+; 0007 00AF                    if( gCurState == 0 )
+	LDS  R30,_gCurState
+	LDS  R31,_gCurState+1
+	SBIW R30,0
+	BRNE _0xE0023
+; 0007 00B0                     {
+; 0007 00B1                         gCalValue0 = gElMatrix[gElLoc]<<4;
+	CALL SUBOPT_0x37
+	CALL SUBOPT_0x38
+; 0007 00B2                         gCalValue1 = 0;
+; 0007 00B3 
+; 0007 00B4                         for( i=0; i< 4; i++)
+_0xE0025:
+	__CPWRN 16,17,4
+	BRGE _0xE0026
+; 0007 00B5                         {
+; 0007 00B6                             if( gElMatrix[gElLoc]&(0x08>>i))
+	CALL SUBOPT_0x37
+	CALL SUBOPT_0x39
+	BRNE _0xE0026
+; 0007 00B7                             break;
+; 0007 00B8                         }
+	__ADDWRN 16,17,1
+	RJMP _0xE0025
+_0xE0026:
+; 0007 00B9                         gShift = i;
+	CALL SUBOPT_0x3A
+; 0007 00BA 
+; 0007 00BB                         gShift++;
+; 0007 00BC                         if( gShift > 3 ) gShift = 0;
+	CALL SUBOPT_0x3B
+	BRLT _0xE0028
+	CALL SUBOPT_0x3C
+; 0007 00BD 
+; 0007 00BE                         PORTC = gCalValue0|(0x08>>gShift);
+_0xE0028:
+	CALL SUBOPT_0x3D
+; 0007 00BF                         gCurState = 1;
+	CALL SUBOPT_0x3E
+; 0007 00C0                     }
+; 0007 00C1                     else if( gCurState == 1 )
+	RJMP _0xE0029
+_0xE0023:
+	CALL SUBOPT_0x3F
+	SBIW R26,1
+	BRNE _0xE002A
+; 0007 00C2                     {
+; 0007 00C3                         PORTC = gCalValue1;
+	CALL SUBOPT_0x40
+; 0007 00C4                         gCurState = 2;
+; 0007 00C5                     }
+; 0007 00C6                     else if( gCurState == 2 )
+	RJMP _0xE002B
+_0xE002A:
+	CALL SUBOPT_0x3F
+	SBIW R26,2
+	BRNE _0xE002C
+; 0007 00C7                     {
+; 0007 00C8                         gShift++;
+	CALL SUBOPT_0x41
+; 0007 00C9                         if( gShift > 3 ) gShift = 0;
+	CALL SUBOPT_0x3B
+	BRLT _0xE002D
+	CALL SUBOPT_0x3C
+; 0007 00CA                         PORTC = gCalValue0|(0x08>>gShift);
+_0xE002D:
+	CALL SUBOPT_0x3D
+; 0007 00CB                         gCurState = 3;
+	CALL SUBOPT_0x42
+; 0007 00CC                     }
+; 0007 00CD                     else if( gCurState == 3 )
+	RJMP _0xE002E
+_0xE002C:
+	CALL SUBOPT_0x3F
+	SBIW R26,3
+	BRNE _0xE002F
+; 0007 00CE                     {
+; 0007 00CF                         PORTC = gCalValue1;
+	CALL SUBOPT_0x43
+; 0007 00D0                         gCurState = 4;
+; 0007 00D1                     }
+; 0007 00D2                     else if( gCurState == 4 )
+	RJMP _0xE0030
+_0xE002F:
+	CALL SUBOPT_0x3F
+	SBIW R26,4
+	BRNE _0xE0031
+; 0007 00D3                     {
+; 0007 00D4                         gShift++;
+	CALL SUBOPT_0x41
+; 0007 00D5                         if( gShift > 3 ) gShift = 0;
+	CALL SUBOPT_0x3B
+	BRLT _0xE0032
+	CALL SUBOPT_0x3C
+; 0007 00D6                         PORTC = gCalValue0|(0x08>>gShift);
+_0xE0032:
+	CALL SUBOPT_0x3D
+; 0007 00D7                         gCurState = 5;
+	CALL SUBOPT_0x44
+; 0007 00D8                     }
+; 0007 00D9                     else if( gCurState == 5 )
+	RJMP _0xE0033
+_0xE0031:
+	CALL SUBOPT_0x3F
+	SBIW R26,5
+	BRNE _0xE0034
+; 0007 00DA                     {
+; 0007 00DB                         PORTC = gCalValue1;
+	CALL SUBOPT_0x45
+; 0007 00DC                         gElLoc++;
+; 0007 00DD                         gCurState = 0;
+	LDI  R30,LOW(0)
+	STS  _gCurState,R30
+	STS  _gCurState+1,R30
+; 0007 00DE                         gShotGapWaitTime = 200;  //0.5ms * 200 = 100ms
+	LDI  R30,LOW(200)
+	LDI  R31,HIGH(200)
+	STS  _gShotGapWaitTime,R30
+	STS  _gShotGapWaitTime+1,R31
+; 0007 00DF                         if( gElLoc > 3 )
+	LDS  R26,_gElLoc
+	LDS  R27,_gElLoc+1
+	SBIW R26,4
+	BRLT _0xE0035
+; 0007 00E0                         {
+; 0007 00E1                             gShotCnt++;
+	CALL SUBOPT_0x46
+; 0007 00E2                             gElLoc = 0;
+; 0007 00E3                         }
+; 0007 00E4 
+; 0007 00E5                         if(gShotCnt >=1)      //1CYCLE
+_0xE0035:
+	LDS  R26,_gShotCnt
+	CPI  R26,LOW(0x1)
+	BRLO _0xE0036
+; 0007 00E6                         {
+; 0007 00E7                             gShotCnt = 0;
+	CALL SUBOPT_0x47
+; 0007 00E8                             gShotWaitTime = 0;
+; 0007 00E9                             gElCompletFlag = TRUE;
+; 0007 00EA                         }
+; 0007 00EB                     }
+_0xE0036:
+; 0007 00EC                 }
+_0xE0034:
+_0xE0033:
+_0xE0030:
+_0xE002E:
+_0xE002B:
+_0xE0029:
+_0xE0022:
+; 0007 00ED             }
+_0xE0020:
+; 0007 00EE         }
+_0xE001E:
+; 0007 00EF      }
+; 0007 00F0 }
+_0xE0004:
 	LD   R16,Y+
 	LD   R17,Y+
 	RET
 ; .FEND
 ;
 ;void PulseGenerator6( void )
-; 0007 01B4 {
-_PulseGenerator6:
-; .FSTART _PulseGenerator6
-; 0007 01B5      // Reinitialize Timer1 value
-; 0007 01B6     TCNT1H=0xE600 >> 8;          //     0.4ms
-	LDI  R30,LOW(230)
-	OUT  0x2D,R30
-; 0007 01B7     TCNT1L=0xE600 & 0xff;
-	LDI  R30,LOW(0)
-	OUT  0x2C,R30
-; 0007 01B8 
-; 0007 01B9     // Place your code here
-; 0007 01BA     if( gRunFlag==TRUE && gElCompletFlag == FALSE )
-	LDS  R26,_gRunFlag
-	CPI  R26,LOW(0x1)
-	BRNE _0xE0079
-	LDS  R26,_gElCompletFlag
-	CPI  R26,LOW(0x0)
-	BREQ _0xE007A
-_0xE0079:
-	RJMP _0xE0078
-_0xE007A:
-; 0007 01BB     {
-; 0007 01BC        if( gCurState == 0 )
-	LDS  R30,_gCurState
-	LDS  R31,_gCurState+1
-	SBIW R30,0
-	BRNE _0xE007B
-; 0007 01BD        {
-; 0007 01BE           gCalValue0 = gElMatrix[gElLoc]<<4 |(~gElMatrix[gElLoc])&0x0f; //((~gElMatrix[gElLoc]<<4)&0xf0)| gElMatrix[gElL ...
-	CALL SUBOPT_0x36
-	LD   R30,Z
-	MOV  R0,R30
-	SWAP R30
-	ANDI R30,0xF0
-	MOV  R26,R30
-	MOV  R30,R0
-	COM  R30
-	ANDI R30,LOW(0xF)
-	OR   R30,R26
-	LDI  R31,0
-	STS  _gCalValue0,R30
-	STS  _gCalValue0+1,R31
-; 0007 01BF           gCalValue1 = gCalValue0&0x0f; // (~gElMatrix[gElLoc])&0x0f;
-	ANDI R30,LOW(0xF)
-	ANDI R31,HIGH(0xF)
-	STS  _gCalValue1,R30
-	STS  _gCalValue1+1,R31
-; 0007 01C0 
-; 0007 01C1           PORTC = gCalValue0;
-	LDS  R30,_gCalValue0
-	OUT  0x15,R30
-; 0007 01C2           gDutyOff = 0;
-	CALL SUBOPT_0x41
-; 0007 01C3           gCurState = 1;
-	CALL SUBOPT_0x3B
-; 0007 01C4        }
-; 0007 01C5        else if( gCurState == 1 )
-	RJMP _0xE007C
-_0xE007B:
-	CALL SUBOPT_0x3C
-	SBIW R26,1
-	BRNE _0xE007D
-; 0007 01C6        {
-; 0007 01C7           gDutyOff++;
-	CALL SUBOPT_0x43
-; 0007 01C8           if( gDutyOff >14 )gCurState = 2;
-	CALL SUBOPT_0x44
-	SBIW R26,15
-	BRLT _0xE007E
-	CALL SUBOPT_0x3D
-; 0007 01C9        }
-_0xE007E:
-; 0007 01CA        else if( gCurState == 2 )
-	RJMP _0xE007F
-_0xE007D:
-	CALL SUBOPT_0x3C
-	SBIW R26,2
-	BRNE _0xE0080
-; 0007 01CB        {
-; 0007 01CC           gDutyOff = 0;
-	CALL SUBOPT_0x41
-; 0007 01CD           PORTC = gCalValue1;
-	LDS  R30,_gCalValue1
-	OUT  0x15,R30
-; 0007 01CE           gCurState = 3;
-	CALL SUBOPT_0x3E
-; 0007 01CF        }
-; 0007 01D0        else if( gCurState == 3 )
-	RJMP _0xE0081
-_0xE0080:
-	CALL SUBOPT_0x3C
-	SBIW R26,3
-	BRNE _0xE0082
-; 0007 01D1        {
-; 0007 01D2           PORTC = gCalValue0;
-	CALL SUBOPT_0x47
-; 0007 01D3           gDutyOff++;
-; 0007 01D4           if( gDutyOff >15) gCurState = 4;
-	CALL SUBOPT_0x44
-	SBIW R26,16
-	BRLT _0xE0083
-	CALL SUBOPT_0x3F
-; 0007 01D5        }
-_0xE0083:
-; 0007 01D6        else if( gCurState == 4 )
-	RJMP _0xE0084
-_0xE0082:
-	CALL SUBOPT_0x3C
-	SBIW R26,4
-	BRNE _0xE0085
-; 0007 01D7        {
-; 0007 01D8           gDutyOff = 0;
-	CALL SUBOPT_0x41
-; 0007 01D9           PORTC = gCalValue1;
-	LDS  R30,_gCalValue1
-	OUT  0x15,R30
-; 0007 01DA           gCurState = 5;
-	CALL SUBOPT_0x40
-; 0007 01DB        }
-; 0007 01DC        else if( gCurState == 5 )
-	RJMP _0xE0086
-_0xE0085:
-	CALL SUBOPT_0x3C
-	SBIW R26,5
-	BRNE _0xE0087
-; 0007 01DD        {
-; 0007 01DE           PORTC = gCalValue0;
-	CALL SUBOPT_0x47
-; 0007 01DF           gDutyOff++;
-; 0007 01E0           if( gDutyOff >15) gCurState = 6;
-	CALL SUBOPT_0x44
-	SBIW R26,16
-	BRLT _0xE0088
-	CALL SUBOPT_0x42
-; 0007 01E1        }
-_0xE0088:
-; 0007 01E2        else if( gCurState == 6 )
-	RJMP _0xE0089
-_0xE0087:
-	CALL SUBOPT_0x3C
-	SBIW R26,6
-	BRNE _0xE008A
-; 0007 01E3        {
-; 0007 01E4           gDutyOff = 0;
-	CALL SUBOPT_0x41
-; 0007 01E5           PORTC = gCalValue1;
-	LDS  R30,_gCalValue1
-	OUT  0x15,R30
-; 0007 01E6           gCurState = 7;
-	LDI  R30,LOW(7)
-	LDI  R31,HIGH(7)
-	CALL SUBOPT_0x48
-; 0007 01E7        }
-; 0007 01E8        else if( gCurState == 7 )
-	RJMP _0xE008B
-_0xE008A:
-	CALL SUBOPT_0x3C
-	SBIW R26,7
-	BRNE _0xE008C
-; 0007 01E9        {
-; 0007 01EA           PORTC = gCalValue0;
-	CALL SUBOPT_0x47
-; 0007 01EB           gDutyOff++;
-; 0007 01EC           if( gDutyOff >15) gCurState = 8;
-	CALL SUBOPT_0x44
-	SBIW R26,16
-	BRLT _0xE008D
-	LDI  R30,LOW(8)
-	LDI  R31,HIGH(8)
-	CALL SUBOPT_0x48
-; 0007 01ED        }
-_0xE008D:
-; 0007 01EE        else if( gCurState == 8 )
-	RJMP _0xE008E
-_0xE008C:
-	CALL SUBOPT_0x3C
-	SBIW R26,8
-	BRNE _0xE008F
-; 0007 01EF        {
-; 0007 01F0           gDutyOff = 0;
-	CALL SUBOPT_0x41
-; 0007 01F1           PORTC = gCalValue1;
-	LDS  R30,_gCalValue1
-	OUT  0x15,R30
-; 0007 01F2           gCurState = 9;
-	LDI  R30,LOW(9)
-	LDI  R31,HIGH(9)
-	CALL SUBOPT_0x48
-; 0007 01F3        }
-; 0007 01F4        else if( gCurState == 9 )
-	RJMP _0xE0090
-_0xE008F:
-	CALL SUBOPT_0x3C
-	SBIW R26,9
-	BRNE _0xE0091
-; 0007 01F5        {
-; 0007 01F6           PORTC = gCalValue0;
-	CALL SUBOPT_0x47
-; 0007 01F7           gDutyOff++;
-; 0007 01F8           if( gDutyOff >15) gCurState = 10;
-	CALL SUBOPT_0x44
-	SBIW R26,16
-	BRLT _0xE0092
-	LDI  R30,LOW(10)
-	LDI  R31,HIGH(10)
-	CALL SUBOPT_0x48
-; 0007 01F9        }
-_0xE0092:
-; 0007 01FA        else if( gCurState == 10 )
-	RJMP _0xE0093
-_0xE0091:
-	CALL SUBOPT_0x3C
-	SBIW R26,10
-	BRNE _0xE0094
-; 0007 01FB        {
-; 0007 01FC           gDutyOff = 0;
-	CALL SUBOPT_0x41
-; 0007 01FD           PORTC = gCalValue1;
-	LDS  R30,_gCalValue1
-	OUT  0x15,R30
-; 0007 01FE           gCurState = 11;
-	LDI  R30,LOW(11)
-	LDI  R31,HIGH(11)
-	CALL SUBOPT_0x48
-; 0007 01FF        }
-; 0007 0200        else if( gCurState == 11 )
-	RJMP _0xE0095
-_0xE0094:
-	CALL SUBOPT_0x3C
-	SBIW R26,11
-	BRNE _0xE0096
-; 0007 0201        {
-; 0007 0202           gDutyOff++;
-	CALL SUBOPT_0x43
-; 0007 0203           if( gDutyOff > 363)     //150ms
-	CALL SUBOPT_0x44
-	CPI  R26,LOW(0x16C)
-	LDI  R30,HIGH(0x16C)
-	CPC  R27,R30
-	BRLT _0xE0097
-; 0007 0204           {
-; 0007 0205              gCurState = 0;
-	CALL SUBOPT_0x45
-; 0007 0206              gElLoc++;
-; 0007 0207              if( gElLoc > 3 )
-	LDS  R26,_gElLoc
-	LDS  R27,_gElLoc+1
-	SBIW R26,4
-	BRLT _0xE0098
-; 0007 0208              {
-; 0007 0209                 PORTC = 0x00;
-	CALL SUBOPT_0x46
-; 0007 020A                 gElLoc = 0;
-; 0007 020B                 gElCompletFlag = TRUE;
-; 0007 020C              }
-; 0007 020D           }
-_0xE0098:
-; 0007 020E        }
-_0xE0097:
-; 0007 020F    }
-_0xE0096:
-_0xE0095:
-_0xE0093:
-_0xE0090:
-_0xE008E:
-_0xE008B:
-_0xE0089:
-_0xE0086:
-_0xE0084:
-_0xE0081:
-_0xE007F:
-_0xE007C:
-; 0007 0210 }
-_0xE0078:
-	RET
-; .FEND
+; 0007 00F3 {
+; 0007 00F4      // Reinitialize Timer1 value
+; 0007 00F5     TCNT1H=0xE600 >> 8;          //     0.4ms
+; 0007 00F6     TCNT1L=0xE600 & 0xff;
+; 0007 00F7 
+; 0007 00F8     // Place your code here
+; 0007 00F9     if( gRunFlag==TRUE && gElCompletFlag == FALSE )
+; 0007 00FA     {
+; 0007 00FB        if( gCurState == 0 )
+; 0007 00FC        {
+; 0007 00FD           gCalValue0 = gElMatrix[gElLoc]<<4 |(~gElMatrix[gElLoc])&0x0f; //((~gElMatrix[gElLoc]<<4)&0xf0)| gElMatrix[gElL ...
+; 0007 00FE           gCalValue1 = gCalValue0&0x0f; // (~gElMatrix[gElLoc])&0x0f;
+; 0007 00FF 
+; 0007 0100           PORTC = gCalValue0;
+; 0007 0101           gDutyOff = 0;
+; 0007 0102           gCurState = 1;
+; 0007 0103        }
+; 0007 0104        else if( gCurState == 1 )
+; 0007 0105        {
+; 0007 0106           gDutyOff++;
+; 0007 0107           if( gDutyOff >14 )gCurState = 2;
+; 0007 0108        }
+; 0007 0109        else if( gCurState == 2 )
+; 0007 010A        {
+; 0007 010B           gDutyOff = 0;
+; 0007 010C           PORTC = gCalValue1;
+; 0007 010D           gCurState = 3;
+; 0007 010E        }
+; 0007 010F        else if( gCurState == 3 )
+; 0007 0110        {
+; 0007 0111           PORTC = gCalValue0;
+; 0007 0112           gDutyOff++;
+; 0007 0113           if( gDutyOff >15) gCurState = 4;
+; 0007 0114        }
+; 0007 0115        else if( gCurState == 4 )
+; 0007 0116        {
+; 0007 0117           gDutyOff = 0;
+; 0007 0118           PORTC = gCalValue1;
+; 0007 0119           gCurState = 5;
+; 0007 011A        }
+; 0007 011B        else if( gCurState == 5 )
+; 0007 011C        {
+; 0007 011D           PORTC = gCalValue0;
+; 0007 011E           gDutyOff++;
+; 0007 011F           if( gDutyOff >15) gCurState = 6;
+; 0007 0120        }
+; 0007 0121        else if( gCurState == 6 )
+; 0007 0122        {
+; 0007 0123           gDutyOff = 0;
+; 0007 0124           PORTC = gCalValue1;
+; 0007 0125           gCurState = 7;
+; 0007 0126        }
+; 0007 0127        else if( gCurState == 7 )
+; 0007 0128        {
+; 0007 0129           PORTC = gCalValue0;
+; 0007 012A           gDutyOff++;
+; 0007 012B           if( gDutyOff >15) gCurState = 8;
+; 0007 012C        }
+; 0007 012D        else if( gCurState == 8 )
+; 0007 012E        {
+; 0007 012F           gDutyOff = 0;
+; 0007 0130           PORTC = gCalValue1;
+; 0007 0131           gCurState = 9;
+; 0007 0132        }
+; 0007 0133        else if( gCurState == 9 )
+; 0007 0134        {
+; 0007 0135           PORTC = gCalValue0;
+; 0007 0136           gDutyOff++;
+; 0007 0137           if( gDutyOff >15) gCurState = 10;
+; 0007 0138        }
+; 0007 0139        else if( gCurState == 10 )
+; 0007 013A        {
+; 0007 013B           gDutyOff = 0;
+; 0007 013C           PORTC = gCalValue1;
+; 0007 013D           gCurState = 11;
+; 0007 013E        }
+; 0007 013F        else if( gCurState == 11 )
+; 0007 0140        {
+; 0007 0141           gDutyOff++;
+; 0007 0142           if( gDutyOff > 363)     //150ms
+; 0007 0143           {
+; 0007 0144              gCurState = 0;
+; 0007 0145              gElLoc++;
+; 0007 0146              if( gElLoc > 3 )
+; 0007 0147              {
+; 0007 0148                 PORTC = 0x00;
+; 0007 0149                 gElLoc = 0;
+; 0007 014A                 gElCompletFlag = TRUE;
+; 0007 014B              }
+; 0007 014C           }
+; 0007 014D        }
+; 0007 014E    }
+; 0007 014F }
 ;
 ;interrupt [TIM1_OVF] void timer1_ovf_isr(void)
-; 0007 0213 {
+; 0007 0152 {
 _timer1_ovf_isr:
 ; .FSTART _timer1_ovf_isr
 	ST   -Y,R0
@@ -5640,18 +5373,31 @@ _timer1_ovf_isr:
 	ST   -Y,R31
 	IN   R30,SREG
 	ST   -Y,R30
-; 0007 0214      if( gGenMode==FALSE )
-	LDS  R30,_gGenMode
-	CPI  R30,0
-	BRNE _0xE0099
-; 0007 0215           PulseGenerator5();
-	RCALL _PulseGenerator5
-; 0007 0216      else PulseGenerator6();
-	RJMP _0xE009A
-_0xE0099:
-	RCALL _PulseGenerator6
-; 0007 0217 }
-_0xE009A:
+; 0007 0153     PulseGenerator();
+	RCALL _PulseGenerator
+; 0007 0154 
+; 0007 0155     if(gSetVolagteInitTime>0)
+	LDS  R26,_gSetVolagteInitTime
+	LDS  R27,_gSetVolagteInitTime+1
+	CALL __CPW02
+	BRGE _0xE0058
+; 0007 0156     {
+; 0007 0157          gSetVolagteInitTime--;
+	LDI  R26,LOW(_gSetVolagteInitTime)
+	LDI  R27,HIGH(_gSetVolagteInitTime)
+	CALL SUBOPT_0x48
+; 0007 0158     }
+; 0007 0159     else
+	RJMP _0xE0059
+_0xE0058:
+; 0007 015A     {
+; 0007 015B         gSetVolagteInitTime =0;
+	LDI  R30,LOW(0)
+	STS  _gSetVolagteInitTime,R30
+	STS  _gSetVolagteInitTime+1,R30
+; 0007 015C     }
+_0xE0059:
+; 0007 015D }
 	LD   R30,Y+
 	OUT  SREG,R30
 	LD   R31,Y+
@@ -5669,456 +5415,397 @@ _0xE009A:
 ; .FEND
 ;
 ;void PortInit( void )
-; 0007 021A {
+; 0007 0160 {
 _PortInit:
 ; .FSTART _PortInit
-; 0007 021B     // PORTA
-; 0007 021C     // bit 7 : N.C
-; 0007 021D     // bit 6 : N.C
-; 0007 021E     // bit 5 : EPG 2 out(LED)
-; 0007 021F     // bit 4 : EPG 1 out(LED)
-; 0007 0220     // bit 3 : DAC7611 LD  out
-; 0007 0221     // bit 2 : DAC7611 CS  out
-; 0007 0222     // bit 1 : DAC7611 CLK out
-; 0007 0223     // bit 0 : DAC7611 SDI out
-; 0007 0224     DDRA    = 0x3f;
+; 0007 0161     // PORTA
+; 0007 0162     // bit 7 : N.C
+; 0007 0163     // bit 6 : N.C
+; 0007 0164     // bit 5 : EPG 2 out(LED)
+; 0007 0165     // bit 4 : EPG 1 out(LED)
+; 0007 0166     // bit 3 : DAC7611 LD  out
+; 0007 0167     // bit 2 : DAC7611 CS  out
+; 0007 0168     // bit 1 : DAC7611 CLK out
+; 0007 0169     // bit 0 : DAC7611 SDI out
+; 0007 016A     DDRA    = 0x3f;
 	LDI  R30,LOW(63)
 	OUT  0x1A,R30
-; 0007 0225     PORTA   = 0x04;
+; 0007 016B     PORTA   = 0x04;
 	LDI  R30,LOW(4)
 	OUT  0x1B,R30
-; 0007 0226 
-; 0007 0227     //PORTB
-; 0007 0228     // bit 7 : N.C
-; 0007 0229     // bit 6 : LF398 Sample Hold out
-; 0007 022A     // bit 5 : N.C
-; 0007 022B     // bit 4 : N.C
-; 0007 022C     // bit 3 : N.C
-; 0007 022D     // bit 2 : N.C
-; 0007 022E     // bit 1 : N.C
-; 0007 022F     // bit 0 : N.C
-; 0007 0230     DDRB    = 0x40;
+; 0007 016C 
+; 0007 016D     //PORTB
+; 0007 016E     // bit 7 : N.C
+; 0007 016F     // bit 6 : LF398 Sample Hold out
+; 0007 0170     // bit 5 : N.C
+; 0007 0171     // bit 4 : N.C
+; 0007 0172     // bit 3 : N.C
+; 0007 0173     // bit 2 : N.C
+; 0007 0174     // bit 1 : N.C
+; 0007 0175     // bit 0 : N.C
+; 0007 0176     DDRB    = 0x40;
 	LDI  R30,LOW(64)
 	OUT  0x17,R30
-; 0007 0231     PORTB   = 0x01;
+; 0007 0177     PORTB   = 0x01;
 	LDI  R30,LOW(1)
 	OUT  0x18,R30
-; 0007 0232 
-; 0007 0233     //PORTC
-; 0007 0234     //bit 7: ELECT7
-; 0007 0235     //bit 6: ELECT6
-; 0007 0236     //bit 5: ELECT5
-; 0007 0237     //bit 4: ELECT4
-; 0007 0238     //bit 3: ELECT3
-; 0007 0239     //bit 2: ELECT2
-; 0007 023A     //bit 1: ELECT1
-; 0007 023B     //bit 0: ELECT0
-; 0007 023C     DDRC    = 0xff;
+; 0007 0178 
+; 0007 0179     //PORTC
+; 0007 017A     //bit 7: ELECT7
+; 0007 017B     //bit 6: ELECT6
+; 0007 017C     //bit 5: ELECT5
+; 0007 017D     //bit 4: ELECT4
+; 0007 017E     //bit 3: ELECT3
+; 0007 017F     //bit 2: ELECT2
+; 0007 0180     //bit 1: ELECT1
+; 0007 0181     //bit 0: ELECT0
+; 0007 0182     DDRC    = 0xff;
 	LDI  R30,LOW(255)
 	OUT  0x14,R30
-; 0007 023D     PORTC   = 0x00;
+; 0007 0183     PORTC   = 0x00;
 	LDI  R30,LOW(0)
 	OUT  0x15,R30
-; 0007 023E 
-; 0007 023F     //PORTD
-; 0007 0240     //bit 7: (OUT) Voltage Read Select
-; 0007 0241     //bit 6: NC
-; 0007 0242     //bit 5: NC
-; 0007 0243     //bit 4: (IN)FET destruction sen
-; 0007 0244     //bit 3: TXD1
-; 0007 0245     //bit 2: RXD1
-; 0007 0246     //bit 1: NC
-; 0007 0247     //bit 0: NC
-; 0007 0248     DDRD    = 0x80;
+; 0007 0184 
+; 0007 0185     //PORTD
+; 0007 0186     //bit 7: (OUT) Voltage Read Select
+; 0007 0187     //bit 6: NC
+; 0007 0188     //bit 5: NC
+; 0007 0189     //bit 4: (IN)FET destruction sen
+; 0007 018A     //bit 3: TXD1
+; 0007 018B     //bit 2: RXD1
+; 0007 018C     //bit 1: NC
+; 0007 018D     //bit 0: NC
+; 0007 018E     DDRD    = 0x80;
 	LDI  R30,LOW(128)
 	OUT  0x11,R30
-; 0007 0249     PORTD   = 0x00;
+; 0007 018F     PORTD   = 0x00;
 	LDI  R30,LOW(0)
 	OUT  0x12,R30
-; 0007 024A 
-; 0007 024B     DDRE    = 0x12;
+; 0007 0190 
+; 0007 0191     DDRE    = 0x12;
 	LDI  R30,LOW(18)
 	OUT  0x2,R30
-; 0007 024C     //PORTE   = 0x54;
-; 0007 024D 
-; 0007 024E     DDRF    = 0xC0;
+; 0007 0192     //PORTE   = 0x54;
+; 0007 0193 
+; 0007 0194     DDRF    = 0xC0;
 	LDI  R30,LOW(192)
 	STS  97,R30
-; 0007 024F     PORTF   = 0x00;
+; 0007 0195     PORTF   = 0x00;
 	LDI  R30,LOW(0)
 	STS  98,R30
-; 0007 0250 
-; 0007 0251     DDRG    = 0xff;
+; 0007 0196 
+; 0007 0197     DDRG    = 0xff;
 	LDI  R30,LOW(255)
 	STS  100,R30
-; 0007 0252     PORTG   = 0x00;
+; 0007 0198     PORTG   = 0x00;
 	LDI  R30,LOW(0)
 	STS  101,R30
-; 0007 0253 
-; 0007 0254     // Timer/Counter 0 initialization
-; 0007 0255     // Clock source: System Clock
-; 0007 0256     // Clock value: 250.000 kHz
-; 0007 0257     // Mode: Normal top=0xFF
-; 0007 0258     // OC0 output: Disconnected
-; 0007 0259     // Timer Period: 1 ms
-; 0007 025A     ASSR=0;
+; 0007 0199 
+; 0007 019A     // Timer/Counter 0 initialization
+; 0007 019B     // Clock source: System Clock
+; 0007 019C     // Clock value: 250.000 kHz
+; 0007 019D     // Mode: Normal top=0xFF
+; 0007 019E     // OC0 output: Disconnected
+; 0007 019F     // Timer Period: 1 ms
+; 0007 01A0     ASSR=0;
 	OUT  0x30,R30
-; 0007 025B     TCCR0=0x04;
+; 0007 01A1     TCCR0=0x04;
 	LDI  R30,LOW(4)
 	OUT  0x33,R30
-; 0007 025C     TCNT0=0x06;
+; 0007 01A2     TCNT0=0x06;
 	LDI  R30,LOW(6)
 	OUT  0x32,R30
-; 0007 025D     OCR0=0x00;
+; 0007 01A3     OCR0=0x00;
 	LDI  R30,LOW(0)
 	OUT  0x31,R30
-; 0007 025E 
-; 0007 025F    // Timer/Counter 1 initialization
-; 0007 0260    // Clock source: System Clock
-; 0007 0261    // Clock value: 2000.000 kHz
-; 0007 0262    // Mode: Normal top=0xFFFF
-; 0007 0263    // OC1A output: Disconnected
-; 0007 0264    // OC1B output: Disconnected
-; 0007 0265    // OC1C output: Disconnected
-; 0007 0266    // Noise Canceler: Off
-; 0007 0267    // Input Capture on Falling Edge
-; 0007 0268    // Timer Period: 10 ms
-; 0007 0269    // Timer1 Overflow Interrupt: On
-; 0007 026A    // Input Capture Interrupt: Off
-; 0007 026B    // Compare A Match Interrupt: Off
-; 0007 026C    // Compare B Match Interrupt: Off
-; 0007 026D    // Compare C Match Interrupt: Off
-; 0007 026E    /*
-; 0007 026F    TCCR1A=0x00;
-; 0007 0270    TCCR1B=0x02;
-; 0007 0271    TCNT1H=0xB1;
-; 0007 0272    TCNT1L=0xE0;
-; 0007 0273    ICR1H=0x00;
-; 0007 0274    ICR1L=0x00;
-; 0007 0275    OCR1AH=0x00;
-; 0007 0276    OCR1AL=0x00;
-; 0007 0277    OCR1BH=0x00;
-; 0007 0278    OCR1BL=0x00;
-; 0007 0279    OCR1CH=0x00;
-; 0007 027A    */
-; 0007 027B 
-; 0007 027C // Timer/Counter 1 initialization
-; 0007 027D // Clock source: System Clock
-; 0007 027E // Clock value: 16000.000 kHz
-; 0007 027F // Mode: Normal top=0xFFFF
-; 0007 0280 // OC1A output: Disconnected
-; 0007 0281 // OC1B output: Disconnected
-; 0007 0282 // OC1C output: Disconnected
-; 0007 0283 // Noise Canceler: Off
-; 0007 0284 // Input Capture on Falling Edge
-; 0007 0285 // Timer Period: 0.4 ms
-; 0007 0286 // Timer1 Overflow Interrupt: On
-; 0007 0287 // Input Capture Interrupt: Off
-; 0007 0288 // Compare A Match Interrupt: Off
-; 0007 0289 // Compare B Match Interrupt: Off
-; 0007 028A // Compare C Match Interrupt: Off
-; 0007 028B #if 0
-; 0007 028C TCCR1A=0x00;
-; 0007 028D TCCR1B= 0x01;
-; 0007 028E TCNT1H=0xE7;
-; 0007 028F TCNT1L=0x00;
-; 0007 0290 #else
-; 0007 0291  TCCR1A=0x00;
+; 0007 01A4 
+; 0007 01A5    // Timer/Counter 1 initialization
+; 0007 01A6    // Clock source: System Clock
+; 0007 01A7    // Clock value: 2000.000 kHz
+; 0007 01A8    // Mode: Normal top=0xFFFF
+; 0007 01A9    // OC1A output: Disconnected
+; 0007 01AA    // OC1B output: Disconnected
+; 0007 01AB    // OC1C output: Disconnected
+; 0007 01AC    // Noise Canceler: Off
+; 0007 01AD    // Input Capture on Falling Edge
+; 0007 01AE    // Timer Period: 10 ms
+; 0007 01AF    // Timer1 Overflow Interrupt: On
+; 0007 01B0    // Input Capture Interrupt: Off
+; 0007 01B1    // Compare A Match Interrupt: Off
+; 0007 01B2    // Compare B Match Interrupt: Off
+; 0007 01B3    // Compare C Match Interrupt: Off
+; 0007 01B4    /*
+; 0007 01B5    TCCR1A=0x00;
+; 0007 01B6    TCCR1B=0x02;
+; 0007 01B7    TCNT1H=0xB1;
+; 0007 01B8    TCNT1L=0xE0;
+; 0007 01B9    ICR1H=0x00;
+; 0007 01BA    ICR1L=0x00;
+; 0007 01BB    OCR1AH=0x00;
+; 0007 01BC    OCR1AL=0x00;
+; 0007 01BD    OCR1BH=0x00;
+; 0007 01BE    OCR1BL=0x00;
+; 0007 01BF    OCR1CH=0x00;
+; 0007 01C0    */
+; 0007 01C1 
+; 0007 01C2 // Timer/Counter 1 initialization
+; 0007 01C3 // Clock source: System Clock
+; 0007 01C4 // Clock value: 16000.000 kHz
+; 0007 01C5 // Mode: Normal top=0xFFFF
+; 0007 01C6 // OC1A output: Disconnected
+; 0007 01C7 // OC1B output: Disconnected
+; 0007 01C8 // OC1C output: Disconnected
+; 0007 01C9 // Noise Canceler: Off
+; 0007 01CA // Input Capture on Falling Edge
+; 0007 01CB // Timer Period: 0.4 ms
+; 0007 01CC // Timer1 Overflow Interrupt: On
+; 0007 01CD // Input Capture Interrupt: Off
+; 0007 01CE // Compare A Match Interrupt: Off
+; 0007 01CF // Compare B Match Interrupt: Off
+; 0007 01D0 // Compare C Match Interrupt: Off
+; 0007 01D1 
+; 0007 01D2 //yjw add 2021.04.03
+; 0007 01D3 #if 0
+; 0007 01D4 TCCR1A=0x00;
+; 0007 01D5 TCCR1B= 0x01;
+; 0007 01D6 TCNT1H=0xE7;
+; 0007 01D7 TCNT1L=0x00;
+; 0007 01D8 #else
+; 0007 01D9 TCCR1A=0x00;
 	CALL SUBOPT_0x49
-; 0007 0292  TCCR1B=0x01;
-; 0007 0293  TCNT1H=0xC1;
-	LDI  R30,LOW(193)
-	OUT  0x2D,R30
-; 0007 0294  TCNT1L=0x80;
-	LDI  R30,LOW(128)
-	OUT  0x2C,R30
-; 0007 0295 #endif
-; 0007 0296 ICR1H=0x00;
+; 0007 01DA TCCR1B=0x01;
+; 0007 01DB TCNT1H=0xE0;
+; 0007 01DC TCNT1L=0xC0;
+; 0007 01DD #endif
+; 0007 01DE ICR1H=0x00;
 	LDI  R30,LOW(0)
 	OUT  0x27,R30
-; 0007 0297 ICR1L=0x00;
+; 0007 01DF ICR1L=0x00;
 	OUT  0x26,R30
-; 0007 0298 OCR1AH=0x00;
+; 0007 01E0 OCR1AH=0x00;
 	OUT  0x2B,R30
-; 0007 0299 OCR1AL=0x00;
+; 0007 01E1 OCR1AL=0x00;
 	OUT  0x2A,R30
-; 0007 029A OCR1BH=0x00;
+; 0007 01E2 OCR1BH=0x00;
 	OUT  0x29,R30
-; 0007 029B OCR1BL=0x00;
+; 0007 01E3 OCR1BL=0x00;
 	OUT  0x28,R30
-; 0007 029C OCR1CH=0x00;
+; 0007 01E4 OCR1CH=0x00;
 	STS  121,R30
-; 0007 029D OCR1CL=0x00;
+; 0007 01E5 OCR1CL=0x00;
 	STS  120,R30
-; 0007 029E 
-; 0007 029F    // Timer(s)/Counter(s) Interrupt(s) initialization
-; 0007 02A0    TIMSK=0x05;
+; 0007 01E6 
+; 0007 01E7    // Timer(s)/Counter(s) Interrupt(s) initialization
+; 0007 01E8    TIMSK=0x05;
 	LDI  R30,LOW(5)
 	OUT  0x37,R30
-; 0007 02A1    ETIMSK=0x00;
+; 0007 01E9    ETIMSK=0x00;
 	LDI  R30,LOW(0)
 	STS  125,R30
-; 0007 02A2 
-; 0007 02A3 
-; 0007 02A4 // USART0 initialization
-; 0007 02A5 // Communication Parameters: 8 Data, 1 Stop, No Parity
-; 0007 02A6 // USART0 Receiver: On
-; 0007 02A7 // USART0 Transmitter: On
-; 0007 02A8 // USART0 Mode: Asynchronous
-; 0007 02A9 // USART0 Baud Rate: 38400 (Double Speed Mode)
-; 0007 02AA    UCSR0A=0x02;
+; 0007 01EA 
+; 0007 01EB 
+; 0007 01EC // USART0 initialization
+; 0007 01ED // Communication Parameters: 8 Data, 1 Stop, No Parity
+; 0007 01EE // USART0 Receiver: On
+; 0007 01EF // USART0 Transmitter: On
+; 0007 01F0 // USART0 Mode: Asynchronous
+; 0007 01F1 // USART0 Baud Rate: 38400 (Double Speed Mode)
+; 0007 01F2    UCSR0A=0x02;
 	LDI  R30,LOW(2)
 	OUT  0xB,R30
-; 0007 02AB    UCSR0B=0x98;
+; 0007 01F3    UCSR0B=0x98;
 	LDI  R30,LOW(152)
 	OUT  0xA,R30
-; 0007 02AC    UCSR0C=0x06;
+; 0007 01F4    UCSR0C=0x06;
 	LDI  R30,LOW(6)
 	STS  149,R30
-; 0007 02AD    UBRR0H=0x00;
+; 0007 01F5    UBRR0H=0x00;
 	LDI  R30,LOW(0)
 	STS  144,R30
-; 0007 02AE    UBRR0L=0x33;
+; 0007 01F6    UBRR0L=0x33;
 	LDI  R30,LOW(51)
 	OUT  0x9,R30
-; 0007 02AF 
-; 0007 02B0    // USART1 initialization
-; 0007 02B1    // Communication Parameters: 8 Data, 1 Stop, No Parity
-; 0007 02B2    // USART1 Receiver: On
-; 0007 02B3    // USART1 Transmitter: On
-; 0007 02B4    // USART1 Mode: Asynchronous
-; 0007 02B5    // USART1 Baud Rate: 57600 (Double Speed Mode)
-; 0007 02B6    UCSR1A=0x02;
+; 0007 01F7 
+; 0007 01F8    // USART1 initialization
+; 0007 01F9    // Communication Parameters: 8 Data, 1 Stop, No Parity
+; 0007 01FA    // USART1 Receiver: On
+; 0007 01FB    // USART1 Transmitter: On
+; 0007 01FC    // USART1 Mode: Asynchronous
+; 0007 01FD    // USART1 Baud Rate: 57600 (Double Speed Mode)
+; 0007 01FE    UCSR1A=0x02;
 	LDI  R30,LOW(2)
 	STS  155,R30
-; 0007 02B7    UCSR1B=0x98;
+; 0007 01FF    UCSR1B=0x98;
 	LDI  R30,LOW(152)
 	STS  154,R30
-; 0007 02B8    UCSR1C=0x06;
+; 0007 0200    UCSR1C=0x06;
 	LDI  R30,LOW(6)
 	STS  157,R30
-; 0007 02B9    UBRR1H=0x00;
+; 0007 0201    UBRR1H=0x00;
 	LDI  R30,LOW(0)
 	STS  152,R30
-; 0007 02BA    UBRR1L=0x22;
+; 0007 0202    UBRR1L=0x22;
 	LDI  R30,LOW(34)
 	STS  153,R30
-; 0007 02BB 
-; 0007 02BC    // ADC initialization
-; 0007 02BD    // ADC Clock frequency: 1000.000 kHz
-; 0007 02BE    // ADC Voltage Reference: AREF pin
-; 0007 02BF    ADMUX  = 0x00 & 0xff;
+; 0007 0203 
+; 0007 0204    // ADC initialization
+; 0007 0205    // ADC Clock frequency: 1000.000 kHz
+; 0007 0206    // ADC Voltage Reference: AREF pin
+; 0007 0207    ADMUX  = 0x00 & 0xff;
 	LDI  R30,LOW(0)
 	OUT  0x7,R30
-; 0007 02C0    ADCSRA = 0x84;
+; 0007 0208    ADCSRA = 0x84;
 	LDI  R30,LOW(132)
 	OUT  0x6,R30
-; 0007 02C1 }
+; 0007 0209 }
 	RET
 ; .FEND
 ;
 ;void InitData(void)
-; 0007 02C4 {
+; 0007 020C {
 _InitData:
 ; .FSTART _InitData
-; 0007 02C5    gCurMode = CUR_INIT;
+; 0007 020D    gCurMode = CUR_INIT;
 	LDI  R30,LOW(0)
 	STS  _gCurMode,R30
-; 0007 02C6    gVoltage=100;
+; 0007 020E    gVoltage=100;
 	LDI  R30,LOW(100)
 	LDI  R31,HIGH(100)
 	STS  _gVoltage,R30
 	STS  _gVoltage+1,R31
-; 0007 02C7    gMode=0;
+; 0007 020F    gMode=0;
 	LDI  R30,LOW(0)
 	STS  _gMode,R30
-; 0007 02C8    gRunFlag = FALSE;
+; 0007 0210    gRunFlag = FALSE;
 	STS  _gRunFlag,R30
-; 0007 02C9    gDepth=0;
+; 0007 0211    gDepth=0;
 	CALL SUBOPT_0xD
-; 0007 02CA    gSpeed=1;
+; 0007 0212    gSpeed=1;
 	LDI  R30,LOW(1)
 	LDI  R31,HIGH(1)
 	STS  _gSpeed,R30
 	STS  _gSpeed+1,R31
-; 0007 02CB    gFlag=0;
+; 0007 0213    gFlag=0;
 	LDI  R30,LOW(0)
 	STS  _gFlag,R30
-; 0007 02CC    gError = (1<<ERROR_NOTLCD);
+; 0007 0214    gError = (1<<ERROR_NOTLCD);
 	LDI  R30,LOW(64)
 	STS  _gError,R30
-; 0007 02CD    gDose = 0;
+; 0007 0215    gDose = 0;
 	CALL SUBOPT_0x7
-; 0007 02CE 
-; 0007 02CF    // A B C D
-; 0007 02D0    // - - + -
-; 0007 02D1    // - - - +
-; 0007 02D2    // + - - -
-; 0007 02D3    // - + - -
-; 0007 02D4    gElMatrix[0] = 0x02;
+; 0007 0216 
+; 0007 0217    // A B C D
+; 0007 0218    // - - + -
+; 0007 0219    // - - - +
+; 0007 021A    // + - - -
+; 0007 021B    // - + - -
+; 0007 021C    gElMatrix[0] = 0x02;
 	CALL SUBOPT_0x4A
-; 0007 02D5    gElMatrix[1] = 0x01;
-; 0007 02D6    gElMatrix[2] = 0x08;
-; 0007 02D7    gElMatrix[3] = 0x04;
-; 0007 02D8 }
+; 0007 021D    gElMatrix[1] = 0x01;
+; 0007 021E    gElMatrix[2] = 0x08;
+; 0007 021F    gElMatrix[3] = 0x04;
+; 0007 0220 }
 	RET
 ; .FEND
 ;void InitSettingData(void)
-; 0007 02DA {
+; 0007 0222 {
 _InitSettingData:
 ; .FSTART _InitSettingData
-; 0007 02DB    DAC7611_WriteVoltage(gVoltage);
+; 0007 0223    DAC7611_WriteVoltage(gVoltage);
 	CALL SUBOPT_0xA
 	CALL _DAC7611_WriteVoltage
-; 0007 02DC }
+; 0007 0224 }
 	RET
 ; .FEND
 ;
 ;void SystemInit( void )
-; 0007 02DF {
+; 0007 0227 {
 _SystemInit:
 ; .FSTART _SystemInit
-; 0007 02E0    PortInit();
+; 0007 0228    PortInit();
 	RCALL _PortInit
-; 0007 02E1    InitData();
+; 0007 0229    InitData();
 	RCALL _InitData
-; 0007 02E2 
-; 0007 02E3    LoadInEeprom();
+; 0007 022A 
+; 0007 022B    LoadInEeprom();
 	RCALL _LoadInEeprom
-; 0007 02E4 
-; 0007 02E5    DAC7611_init(  );
+; 0007 022C 
+; 0007 022D    DAC7611_init(  );
 	CALL _DAC7611_init
-; 0007 02E6 
-; 0007 02E7    InitSettingData();
+; 0007 022E 
+; 0007 022F    InitSettingData();
 	RCALL _InitSettingData
-; 0007 02E8 
-; 0007 02E9    gGenMode = PINB.0?TRUE:FALSE;
+; 0007 0230 
+; 0007 0231    gGenMode = PINB.0?TRUE:FALSE;
 	SBIS 0x16,0
-	RJMP _0xE009B
+	RJMP _0xE005A
 	LDI  R30,LOW(1)
-	RJMP _0xE009C
-_0xE009B:
+	RJMP _0xE005B
+_0xE005A:
 	LDI  R30,LOW(0)
-_0xE009C:
+_0xE005B:
 	STS  _gGenMode,R30
-; 0007 02EA 
-; 0007 02EB    if( gGenMode==TRUE )
-	LDS  R26,_gGenMode
-	CPI  R26,LOW(0x1)
-	BRNE _0xE009E
-; 0007 02EC    {
-; 0007 02ED      HIGH_PGM2_LED;
-	SBI  0x1B,5
-; 0007 02EE      // A B C D
-; 0007 02EF      // + + - -
-; 0007 02F0      // + - + -
-; 0007 02F1      // + - - +
-; 0007 02F2      // + - + -
-; 0007 02F3      gElMatrix[0] = 0x0C;
-	LDI  R30,LOW(12)
-	STS  _gElMatrix,R30
-; 0007 02F4      gElMatrix[1] = 0x0A;
-	LDI  R30,LOW(10)
-	__PUTB1MN _gElMatrix,1
-; 0007 02F5      gElMatrix[2] = 0x09;
-	LDI  R30,LOW(9)
-	__PUTB1MN _gElMatrix,2
-; 0007 02F6      gElMatrix[3] = 0x0A;
-	LDI  R30,LOW(10)
-	__PUTB1MN _gElMatrix,3
-; 0007 02F7 
-; 0007 02F8      TCCR1A=0x00;
-	CALL SUBOPT_0x49
-; 0007 02F9      TCCR1B=0x01;
-; 0007 02FA      TCNT1H=0xE7;
-	LDI  R30,LOW(231)
-	OUT  0x2D,R30
-; 0007 02FB      TCNT1L=0x00;
-	LDI  R30,LOW(0)
-	RJMP _0xE0102
-; 0007 02FC    }
-; 0007 02FD    else
-_0xE009E:
-; 0007 02FE    {
-; 0007 02FF      //TCCR1B= 0x02;
-; 0007 0300      HIGH_PGM1_LED;
+; 0007 0232 
+; 0007 0233    HIGH_PGM1_LED;
 	SBI  0x1B,4
-; 0007 0301 
-; 0007 0302      // A B C D
-; 0007 0303      // - - + -
-; 0007 0304      // - - - +
-; 0007 0305      // + - - -
-; 0007 0306      // - + - -
-; 0007 0307      gElMatrix[0] = 0x02;
+; 0007 0234 
+; 0007 0235      // A B C D
+; 0007 0236      // - - + -
+; 0007 0237      // - - - +
+; 0007 0238      // + - - -
+; 0007 0239      // - + - -
+; 0007 023A      gElMatrix[0] = 0x02;
 	CALL SUBOPT_0x4A
-; 0007 0308      gElMatrix[1] = 0x01;
-; 0007 0309      gElMatrix[2] = 0x08;
-; 0007 030A      gElMatrix[3] = 0x04;
-; 0007 030B 
-; 0007 030C      #if 0  //10ms
-; 0007 030D         TCCR1A=0x00;
-; 0007 030E         TCCR1B=0x02;
-; 0007 030F         TCNT1H=0xB1;
-; 0007 0310         TCNT1L=0xE0;
-; 0007 0311     #else   //1ms
-; 0007 0312         TCCR1A=0x00;
+; 0007 023B      gElMatrix[1] = 0x01;
+; 0007 023C      gElMatrix[2] = 0x08;
+; 0007 023D      gElMatrix[3] = 0x04;
+; 0007 023E 
+; 0007 023F     //0.5ms
+; 0007 0240     TCCR1A=0x00;
 	CALL SUBOPT_0x49
-; 0007 0313         TCCR1B=0x01;
-; 0007 0314         TCNT1H=0xC1;
-	LDI  R30,LOW(193)
-	OUT  0x2D,R30
-; 0007 0315         TCNT1L=0x80;
-	LDI  R30,LOW(128)
-_0xE0102:
-	OUT  0x2C,R30
-; 0007 0316     #endif
-; 0007 0317 
-; 0007 0318 
-; 0007 0319      /*
-; 0007 031A      TCCR1A=0x00;
-; 0007 031B      TCCR1B=0x02;
-; 0007 031C      TCNT1H=0xB1;
-; 0007 031D      TCNT1L=0xE0;
-; 0007 031E      */
-; 0007 031F    }
-; 0007 0320 }
+; 0007 0241     TCCR1B=0x01;
+; 0007 0242 
+; 0007 0243     TCNT1H=0xE0;
+; 0007 0244     TCNT1L=0xC0;
+; 0007 0245 }
 	RET
 ; .FEND
 ;
 ;
 ;BYTE WaitEvent( void )
-; 0007 0324 {
+; 0007 0249 {
 _WaitEvent:
 ; .FSTART _WaitEvent
-; 0007 0325 
-; 0007 0326     while ( 1 )
-_0xE00A4:
-; 0007 0327     {
-; 0007 0328        if( IPC_Get_RxCount0() >=  sizeof( IPC_HEADER ) )
+; 0007 024A 
+; 0007 024B     while ( 1 )
+_0xE005F:
+; 0007 024C     {
+; 0007 024D        if( IPC_Get_RxCount0() >=  sizeof( IPC_HEADER ) )
 	CALL _IPC_Get_RxCount0
 	CPI  R30,LOW(0x7)
-	BRLO _0xE00A7
-; 0007 0329        {
-; 0007 032A            goldTime1ms = gTime1ms;
+	BRLO _0xE0062
+; 0007 024E        {
+; 0007 024F            goldTime1ms = gTime1ms;
 	CALL SUBOPT_0x4B
-; 0007 032B            return EVN_RCVUART0;
+; 0007 0250            return EVN_RCVUART0;
 	LDI  R30,LOW(1)
 	RET
-; 0007 032C        }
-; 0007 032D        else if( IPC_Get_RxCount1() >=  sizeof( IPC_HEADER ) )
-_0xE00A7:
+; 0007 0251        }
+; 0007 0252        else if( IPC_Get_RxCount1() >=  sizeof( IPC_HEADER ) )
+_0xE0062:
 	CALL _IPC_Get_RxCount1
 	CPI  R30,LOW(0x7)
-	BRLO _0xE00A9
-; 0007 032E        {
-; 0007 032F            goldTime1ms = gTime1ms;
+	BRLO _0xE0064
+; 0007 0253        {
+; 0007 0254            goldTime1ms = gTime1ms;
 	CALL SUBOPT_0x4B
-; 0007 0330            return EVN_RCVUART1;
+; 0007 0255            return EVN_RCVUART1;
 	LDI  R30,LOW(2)
 	RET
-; 0007 0331        }
-; 0007 0332        else if( (gTime1ms-goldTime1ms) > 300 ) // 50=200ms
-_0xE00A9:
+; 0007 0256        }
+; 0007 0257        //else if( (gTime1ms-goldTime1ms) > 300 ) // 50=200ms
+; 0007 0258        else if( (gTime1ms-goldTime1ms) > 300 ) // 50=200ms
+_0xE0064:
 	LDS  R26,_goldTime1ms
 	LDS  R27,_goldTime1ms+1
 	LDS  R30,_gTime1ms
@@ -6128,37 +5815,28 @@ _0xE00A9:
 	CPI  R30,LOW(0x12D)
 	LDI  R26,HIGH(0x12D)
 	CPC  R31,R26
-	BRLO _0xE00AB
-; 0007 0333        {
-; 0007 0334          /* if( (gTime1ms- gOldUartTime1ms) > 6000 )
-; 0007 0335           {
-; 0007 0336              gOldUartTime1ms = gTime1ms;
-; 0007 0337              if( IPC_Get_RxCount1() > 0 )
-; 0007 0338              {
-; 0007 0339                 IPC_ResetCount1();
-; 0007 033A              }
-; 0007 033B           }
-; 0007 033C           */
-; 0007 033D           goldTime1ms = gTime1ms;
+	BRLO _0xE0066
+; 0007 0259        {
+; 0007 025A            goldTime1ms = gTime1ms;
 	CALL SUBOPT_0x4B
-; 0007 033E 
-; 0007 033F           return EVN_TIMEOVER;
+; 0007 025B 
+; 0007 025C           return EVN_TIMEOVER;
 	LDI  R30,LOW(3)
 	RET
-; 0007 0340        }
-; 0007 0341     }
-_0xE00AB:
-	RJMP _0xE00A4
-; 0007 0342 }
+; 0007 025D        }
+; 0007 025E     }
+_0xE0066:
+	RJMP _0xE005F
+; 0007 025F }
 ; .FEND
 ;
 ;void SaveInEeprom( void )
-; 0007 0345 {
+; 0007 0262 {
 _SaveInEeprom:
 ; .FSTART _SaveInEeprom
-; 0007 0346    EEPROM_BODY mEDat;
-; 0007 0347 
-; 0007 0348    memset((void *)&mEDat,0 ,sizeof( EEPROM_BODY));
+; 0007 0263    EEPROM_BODY mEDat;
+; 0007 0264 
+; 0007 0265    memset((void *)&mEDat,0 ,sizeof( EEPROM_BODY));
 	SBIW R28,11
 ;	mEDat -> Y+0
 	MOVW R30,R28
@@ -6169,41 +5847,41 @@ _SaveInEeprom:
 	LDI  R26,LOW(11)
 	LDI  R27,0
 	CALL _memset
-; 0007 0349 
-; 0007 034A    mEDat.AkFlag = 'A';
+; 0007 0266 
+; 0007 0267    mEDat.AkFlag = 'A';
 	LDI  R30,LOW(65)
 	ST   Y,R30
-; 0007 034B    mEDat.Run  = gRunFlag?1:0;
+; 0007 0268    mEDat.Run  = gRunFlag?1:0;
 	LDS  R30,_gRunFlag
 	CPI  R30,0
-	BREQ _0xE00AC
+	BREQ _0xE0067
 	LDI  R30,LOW(1)
-	RJMP _0xE00AD
-_0xE00AC:
+	RJMP _0xE0068
+_0xE0067:
 	LDI  R30,LOW(0)
-_0xE00AD:
+_0xE0068:
 	STD  Y+2,R30
-; 0007 034C    mEDat.Dose1 = (BYTE)((gDose>>8)&0xff);
+; 0007 0269    mEDat.Dose1 = (BYTE)((gDose>>8)&0xff);
 	LDS  R30,_gDose
 	LDS  R31,_gDose+1
 	CALL __ASRW8
 	STD  Y+3,R30
-; 0007 034D    mEDat.Dose2 = (BYTE)(gDose&0xff);
+; 0007 026A    mEDat.Dose2 = (BYTE)(gDose&0xff);
 	LDS  R30,_gDose
 	STD  Y+4,R30
-; 0007 034E    mEDat.Voltage = gVoltage ;
+; 0007 026B    mEDat.Voltage = gVoltage ;
 	LDS  R30,_gVoltage
 	STD  Y+5,R30
-; 0007 034F    mEDat.Depth = gDepth;
+; 0007 026C    mEDat.Depth = gDepth;
 	LDS  R30,_gDepth
 	STD  Y+6,R30
-; 0007 0350    mEDat.Speed = gSpeed;
+; 0007 026D    mEDat.Speed = gSpeed;
 	LDS  R30,_gSpeed
 	STD  Y+7,R30
-; 0007 0351    mEDat.Flag  = gFlag;
+; 0007 026E    mEDat.Flag  = gFlag;
 	LDS  R30,_gFlag
 	STD  Y+8,R30
-; 0007 0352    mEDat.Map1  = (gElMatrix[0]<<4)&0xf0 | gElMatrix[1]&0x0f;
+; 0007 026F    mEDat.Map1  = (gElMatrix[0]<<4)&0xf0 | gElMatrix[1]&0x0f;
 	LDS  R30,_gElMatrix
 	SWAP R30
 	ANDI R30,LOW(0xF0)
@@ -6212,7 +5890,7 @@ _0xE00AD:
 	ANDI R30,LOW(0xF)
 	OR   R30,R26
 	STD  Y+9,R30
-; 0007 0353    mEDat.Map2  = (gElMatrix[2]<<4)&0xf0 | gElMatrix[3]&0x0f;
+; 0007 0270    mEDat.Map2  = (gElMatrix[2]<<4)&0xf0 | gElMatrix[3]&0x0f;
 	__GETB1MN _gElMatrix,2
 	SWAP R30
 	ANDI R30,LOW(0xF0)
@@ -6221,7 +5899,7 @@ _0xE00AD:
 	ANDI R30,LOW(0xF)
 	OR   R30,R26
 	STD  Y+10,R30
-; 0007 0354    E2pWriteLen((BYTE*)&mEDat, E_EP_MODE, sizeof( EEPROM_BODY));
+; 0007 0271    E2pWriteLen((BYTE*)&mEDat, E_EP_MODE, sizeof( EEPROM_BODY));
 	MOVW R30,R28
 	ST   -Y,R31
 	ST   -Y,R30
@@ -6229,19 +5907,19 @@ _0xE00AD:
 	ST   -Y,R30
 	LDI  R26,LOW(11)
 	CALL _E2pWriteLen
-; 0007 0355 }
+; 0007 0272 }
 	ADIW R28,11
 	RET
 ; .FEND
 ;
 ;void LoadInEeprom( void )
-; 0007 0358 {
+; 0007 0275 {
 _LoadInEeprom:
 ; .FSTART _LoadInEeprom
-; 0007 0359    BYTE mData[20];
-; 0007 035A    LPEEPROM_BODY mEDat;
-; 0007 035B 
-; 0007 035C    memset((void *)&mData,0 ,20 );
+; 0007 0276    BYTE mData[20];
+; 0007 0277    LPEEPROM_BODY mEDat;
+; 0007 0278 
+; 0007 0279    memset((void *)&mData,0 ,20 );
 	SBIW R28,20
 	ST   -Y,R17
 	ST   -Y,R16
@@ -6256,7 +5934,7 @@ _LoadInEeprom:
 	LDI  R26,LOW(20)
 	LDI  R27,0
 	CALL _memset
-; 0007 035D    E2pReadLen( mData, E_EP_MODE, sizeof( EEPROM_BODY));
+; 0007 027A    E2pReadLen( mData, E_EP_MODE, sizeof( EEPROM_BODY));
 	MOVW R30,R28
 	ADIW R30,2
 	ST   -Y,R31
@@ -6265,23 +5943,23 @@ _LoadInEeprom:
 	ST   -Y,R30
 	LDI  R26,LOW(11)
 	CALL _E2pReadLen
-; 0007 035E    mEDat =(LPEEPROM_BODY)mData ;
+; 0007 027B    mEDat =(LPEEPROM_BODY)mData ;
 	MOVW R30,R28
 	ADIW R30,2
 	MOVW R16,R30
-; 0007 035F 
-; 0007 0360    if( mEDat->AkFlag == 'A' )
+; 0007 027C 
+; 0007 027D    if( mEDat->AkFlag == 'A' )
 	MOVW R26,R16
 	LD   R26,X
 	CPI  R26,LOW(0x41)
 	BREQ PC+2
-	RJMP _0xE00AF
-; 0007 0361    {
-; 0007 0362       gMode = 0; //= mEDat->Mode;
+	RJMP _0xE006A
+; 0007 027E    {
+; 0007 027F       gMode = 0; //= mEDat->Mode;
 	LDI  R30,LOW(0)
 	STS  _gMode,R30
-; 0007 0363       //gRunFlag = mEDat->Run?TRUE:FALSE;
-; 0007 0364       gDose = (int)mEDat->Dose1<<8|mEDat->Dose2;
+; 0007 0280       //gRunFlag = mEDat->Run?TRUE:FALSE;
+; 0007 0281       gDose = (int)mEDat->Dose1<<8|mEDat->Dose2;
 	MOVW R30,R16
 	LDD  R30,Z+3
 	MOV  R31,R30
@@ -6293,124 +5971,124 @@ _LoadInEeprom:
 	OR   R30,R26
 	OR   R31,R27
 	CALL SUBOPT_0x6
-; 0007 0365       if( gDose < 0 ) gDose = 0;
+; 0007 0282       if( gDose < 0 ) gDose = 0;
 	LDS  R26,_gDose+1
 	TST  R26
-	BRPL _0xE00B0
+	BRPL _0xE006B
 	CALL SUBOPT_0x7
-; 0007 0366       if( gDose > 3 ) gDose = 3;
-_0xE00B0:
+; 0007 0283       if( gDose > 3 ) gDose = 3;
+_0xE006B:
 	LDS  R26,_gDose
 	LDS  R27,_gDose+1
 	SBIW R26,4
-	BRLT _0xE00B1
+	BRLT _0xE006C
 	LDI  R30,LOW(3)
 	LDI  R31,HIGH(3)
 	CALL SUBOPT_0x6
-; 0007 0367 
-; 0007 0368       gVoltage = mEDat->Voltage;
-_0xE00B1:
+; 0007 0284 
+; 0007 0285       gVoltage = mEDat->Voltage;
+_0xE006C:
 	MOVW R30,R16
 	LDD  R30,Z+5
 	CALL SUBOPT_0x8
-; 0007 0369       if( gVoltage < 60 ) gVoltage = 60;
-	BRGE _0xE00B2
+; 0007 0286       if( gVoltage < 60 ) gVoltage = 60;
+	BRGE _0xE006D
 	CALL SUBOPT_0x9
-; 0007 036A       if( gVoltage > 120 ) gVoltage = 120;
-_0xE00B2:
+; 0007 0287       if( gVoltage > 120 ) gVoltage = 120;
+_0xE006D:
 	CALL SUBOPT_0xA
 	CPI  R26,LOW(0x79)
 	LDI  R30,HIGH(0x79)
 	CPC  R27,R30
-	BRLT _0xE00B3
+	BRLT _0xE006E
 	CALL SUBOPT_0xB
-; 0007 036B 
-; 0007 036C       gDepth = mEDat->Depth;
-_0xE00B3:
+; 0007 0288 
+; 0007 0289       gDepth = mEDat->Depth;
+_0xE006E:
 	MOVW R30,R16
 	LDD  R30,Z+6
 	CALL SUBOPT_0xC
-; 0007 036D       if( gDepth < 0 ) gDepth = 0;
-	BRPL _0xE00B4
+; 0007 028A       if( gDepth < 0 ) gDepth = 0;
+	BRPL _0xE006F
 	CALL SUBOPT_0xD
-; 0007 036E       if( gDepth > 3 ) gDepth = 3;
-_0xE00B4:
+; 0007 028B       if( gDepth > 3 ) gDepth = 3;
+_0xE006F:
 	LDS  R26,_gDepth
 	LDS  R27,_gDepth+1
 	SBIW R26,4
-	BRLT _0xE00B5
+	BRLT _0xE0070
 	CALL SUBOPT_0xE
-; 0007 036F 
-; 0007 0370       gSpeed = mEDat->Speed;
-_0xE00B5:
+; 0007 028C 
+; 0007 028D       gSpeed = mEDat->Speed;
+_0xE0070:
 	MOVW R30,R16
 	LDD  R30,Z+7
 	CALL SUBOPT_0xF
-; 0007 0371       if( gSpeed < 0 ) gSpeed = 0;
-	BRPL _0xE00B6
+; 0007 028E       if( gSpeed < 0 ) gSpeed = 0;
+	BRPL _0xE0071
 	LDI  R30,LOW(0)
 	STS  _gSpeed,R30
 	STS  _gSpeed+1,R30
-; 0007 0372       if( gSpeed > 2 ) gSpeed = 2;
-_0xE00B6:
+; 0007 028F       if( gSpeed > 2 ) gSpeed = 2;
+_0xE0071:
 	LDS  R26,_gSpeed
 	LDS  R27,_gSpeed+1
 	SBIW R26,3
-	BRLT _0xE00B7
+	BRLT _0xE0072
 	CALL SUBOPT_0x10
-; 0007 0373 
-; 0007 0374       gFlag = mEDat->Flag;
-_0xE00B7:
+; 0007 0290 
+; 0007 0291       gFlag = mEDat->Flag;
+_0xE0072:
 	MOVW R30,R16
 	LDD  R30,Z+8
 	STS  _gFlag,R30
-; 0007 0375       gElMatrix[0] = (mEDat->Map1>>4)&0x0f;
+; 0007 0292       gElMatrix[0] = (mEDat->Map1>>4)&0x0f;
 	MOVW R30,R16
 	LDD  R30,Z+9
 	SWAP R30
 	ANDI R30,LOW(0xF)
 	STS  _gElMatrix,R30
-; 0007 0376       gElMatrix[1] = mEDat->Map1&0x0f;
+; 0007 0293       gElMatrix[1] = mEDat->Map1&0x0f;
 	MOVW R30,R16
 	LDD  R26,Z+9
 	LDI  R30,LOW(15)
 	AND  R30,R26
 	__PUTB1MN _gElMatrix,1
-; 0007 0377       gElMatrix[2] = (mEDat->Map2>>4)&0x0f;
+; 0007 0294       gElMatrix[2] = (mEDat->Map2>>4)&0x0f;
 	MOVW R30,R16
 	LDD  R30,Z+10
 	SWAP R30
 	ANDI R30,LOW(0xF)
 	__PUTB1MN _gElMatrix,2
-; 0007 0378       gElMatrix[3] = mEDat->Map2&0x0f;
+; 0007 0295       gElMatrix[3] = mEDat->Map2&0x0f;
 	MOVW R30,R16
 	LDD  R26,Z+10
 	LDI  R30,LOW(15)
 	AND  R30,R26
 	__PUTB1MN _gElMatrix,3
-; 0007 0379 
-; 0007 037A       if( gVoltage > 50 ) LOW_VOLRY;
+; 0007 0296 
+; 0007 0297       if( gVoltage > 50 ) LOW_VOLRY;
 	CALL SUBOPT_0xA
 	SBIW R26,51
-	BRLT _0xE00B8
+	BRLT _0xE0073
 	CBI  0x12,7
-; 0007 037B       else  HIGH_VOLRY;
-	RJMP _0xE00BB
-_0xE00B8:
+; 0007 0298       else  HIGH_VOLRY;
+	RJMP _0xE0076
+_0xE0073:
 	SBI  0x12,7
-; 0007 037C    }
-_0xE00BB:
-; 0007 037D    else
-	RJMP _0xE00BE
-_0xE00AF:
-; 0007 037E    {
-; 0007 037F       InitData();
+; 0007 0299    }
+_0xE0076:
+; 0007 029A    else
+	RJMP _0xE0079
+_0xE006A:
+; 0007 029B    {
+; 0007 029C       InitData();
 	RCALL _InitData
-; 0007 0380       SaveInEeprom();
+; 0007 029D       SaveInEeprom();
 	RCALL _SaveInEeprom
-; 0007 0381    }
-_0xE00BE:
-; 0007 0382 }
+; 0007 029E    }
+_0xE0079:
+; 0007 029F }
 	LDD  R17,Y+1
 	LDD  R16,Y+0
 	ADIW R28,22
@@ -6418,17 +6096,17 @@ _0xE00BE:
 ; .FEND
 ;
 ;void ADCProcessor( void )
-; 0007 0385 {
+; 0007 02A2 {
 _ADCProcessor:
 ; .FSTART _ADCProcessor
-; 0007 0386    // 0: Heat Protect
-; 0007 0387    // 1: output voltage
-; 0007 0388    // 2: elect current
-; 0007 0389    int mIndexVol=0;
-; 0007 038A    int mVol;
-; 0007 038B    int mTemp;
-; 0007 038C    float mCalvol;
-; 0007 038D    mVol= read_adc( gAdcLoc );
+; 0007 02A3    // 0: Heat Protect
+; 0007 02A4    // 1: output voltage
+; 0007 02A5    // 2: elect current
+; 0007 02A6    int mIndexVol=0;
+; 0007 02A7    int mVol;
+; 0007 02A8    int mTemp;
+; 0007 02A9    float mCalvol;
+; 0007 02AA    mVol= read_adc( gAdcLoc );
 	SBIW R28,4
 	CALL __SAVELOCR6
 ;	mIndexVol -> R16,R17
@@ -6437,98 +6115,226 @@ _ADCProcessor:
 ;	mCalvol -> Y+6
 	__GETWRN 16,17,0
 	LDS  R26,_gAdcLoc
-	CALL _read_adc
+	RCALL _read_adc
 	MOVW R18,R30
-; 0007 038E 
-; 0007 038F    if( gAdcLoc == 0 )
+; 0007 02AB 
+; 0007 02AC    if( gAdcLoc == 0 )
 	LDS  R30,_gAdcLoc
 	LDS  R31,_gAdcLoc+1
 	SBIW R30,0
-	BRNE _0xE00BF
-; 0007 0390    {
-; 0007 0391       if( mVol > 25)
+	BRNE _0xE007A
+; 0007 02AD    {
+; 0007 02AE       if( mVol > 25)
 	__CPWRN 18,19,26
-	BRLT _0xE00C0
-; 0007 0392       {
-; 0007 0393          gError |= (1<<ERROR_HEATSINK);  //2.5V
+	BRLT _0xE007B
+; 0007 02AF       {
+; 0007 02B0          gError |= (1<<ERROR_HEATSINK);  //2.5V
 	LDS  R30,_gError
 	ORI  R30,0x10
 	CALL SUBOPT_0x2E
-; 0007 0394          gCurMode =  CUR_ERROR;
-; 0007 0395       }
-; 0007 0396       else
-	RJMP _0xE00C1
-_0xE00C0:
-; 0007 0397       {
-; 0007 0398          gError &= ~(1<<ERROR_HEATSINK);  //2.5V
+; 0007 02B1          gCurMode =  CUR_ERROR;
+; 0007 02B2       }
+; 0007 02B3       else
+	RJMP _0xE007C
+_0xE007B:
+; 0007 02B4       {
+; 0007 02B5          gError &= ~(1<<ERROR_HEATSINK);  //2.5V
 	LDS  R30,_gError
 	ANDI R30,0xEF
 	STS  _gError,R30
-; 0007 0399       }
-_0xE00C1:
-; 0007 039A    }
-; 0007 039B    else if( gAdcLoc == 1 )
-	RJMP _0xE00C2
-_0xE00BF:
+; 0007 02B6       }
+_0xE007C:
+; 0007 02B7    }
+; 0007 02B8    else if( gAdcLoc == 1 )
+	RJMP _0xE007D
+_0xE007A:
 	CALL SUBOPT_0x4C
 	SBIW R26,1
 	BREQ PC+2
-	RJMP _0xE00C3
-; 0007 039C    {
-; 0007 039D       if( gMode == MODE_READY && gFlag == FLAG_VOLADJ )
+	RJMP _0xE007E
+; 0007 02B9    {
+; 0007 02BA       if( gMode == MODE_READY && gFlag == FLAG_VOLADJ )
 	LDS  R26,_gMode
 	CPI  R26,LOW(0x1)
-	BRNE _0xE00C5
+	BRNE _0xE0080
 	LDS  R26,_gFlag
 	CPI  R26,LOW(0x1)
-	BREQ _0xE00C6
-_0xE00C5:
-	RJMP _0xE00C4
-_0xE00C6:
-; 0007 039E       {
-; 0007 039F 
-; 0007 03A0         if( gVoltage> 50 )
+	BREQ _0xE0081
+_0xE0080:
+	RJMP _0xE007F
+_0xE0081:
+; 0007 02BB       {
+; 0007 02BC 
+; 0007 02BD         if( gVoltage> 50 )
 	CALL SUBOPT_0xA
 	SBIW R26,51
 	BRGE PC+2
-	RJMP _0xE00C7
-; 0007 03A1         {
-; 0007 03A2            if( gVolChkCount > 0 )
+	RJMP _0xE0082
+; 0007 02BE         {
+; 0007 02BF            if( gVolChkCount > 0 )
 	CALL SUBOPT_0x4D
-	BRGE _0xE00C8
-; 0007 03A3            {
-; 0007 03A4               gVolChkCount--;
-	CALL SUBOPT_0x4E
-; 0007 03A5            }
-; 0007 03A6            else   //2*600ms = 1.2sec
-	RJMP _0xE00C9
-_0xE00C8:
-; 0007 03A7            {
-; 0007 03A8               if(gVoltage < 20 ) mIndexVol = 0;
+	BRGE _0xE0083
+; 0007 02C0            {
+; 0007 02C1               gVolChkCount--;
+	LDI  R26,LOW(_gVolChkCount)
+	LDI  R27,HIGH(_gVolChkCount)
+	CALL SUBOPT_0x48
+; 0007 02C2            }
+; 0007 02C3            else   //2*600ms = 1.2sec
+	RJMP _0xE0084
+_0xE0083:
+; 0007 02C4            {
+; 0007 02C5               if(gVoltage < 20 ) mIndexVol = 0;
 	CALL SUBOPT_0xA
 	SBIW R26,20
-	BRGE _0xE00CA
+	BRGE _0xE0085
 	__GETWRN 16,17,0
-; 0007 03A9               else  mIndexVol = (gVoltage-20)/10;
-	RJMP _0xE00CB
-_0xE00CA:
+; 0007 02C6               else  mIndexVol = (gVoltage-20)/10;
+	RJMP _0xE0086
+_0xE0085:
 	CALL SUBOPT_0xA
 	CALL SUBOPT_0x2
 	MOVW R16,R30
-; 0007 03AA 
-; 0007 03AB               mCalvol = DacArray[mIndexVol];
-_0xE00CB:
-	CALL SUBOPT_0x4F
-; 0007 03AC 
-; 0007 03AD               //gReadVol =(int)(60.0f+(float)mVol*2.2f);
-; 0007 03AE 
-; 0007 03AF               if( (float)mVol > (mCalvol-mCalvol*0.2f) &&
-; 0007 03B0                   (float)mVol < (mCalvol+mCalvol*0.2f) )
+; 0007 02C7 
+; 0007 02C8               mCalvol = DacArray[mIndexVol];
+_0xE0086:
+	CALL SUBOPT_0x4E
+; 0007 02C9 
+; 0007 02CA               //gReadVol =(int)(60.0f+(float)mVol*2.2f);
+; 0007 02CB 
+; 0007 02CC               if( (float)mVol > (mCalvol-mCalvol*0.2f) &&
+; 0007 02CD                   (float)mVol < (mCalvol+mCalvol*0.2f) )
 	PUSH R23
 	PUSH R22
 	PUSH R31
 	PUSH R30
+	CALL SUBOPT_0x4F
 	CALL SUBOPT_0x50
+	CALL __SWAPD12
+	CALL __SUBF12
+	POP  R26
+	POP  R27
+	POP  R24
+	POP  R25
+	CALL __CMPF12
+	BREQ PC+2
+	BRCC PC+2
+	RJMP _0xE0088
+	CALL SUBOPT_0x3
+	PUSH R23
+	PUSH R22
+	PUSH R31
+	PUSH R30
+	CALL SUBOPT_0x51
+	CALL __ADDF12
+	POP  R26
+	POP  R27
+	POP  R24
+	POP  R25
+	CALL __CMPF12
+	BRLO _0xE0089
+_0xE0088:
+	RJMP _0xE0087
+_0xE0089:
+; 0007 02CE               {
+; 0007 02CF 
+; 0007 02D0                  gFlag = FLAG_READY;
+	CALL SUBOPT_0x52
+; 0007 02D1                  if( gError & (1<<ERROR_VOL) )
+	BREQ _0xE008A
+; 0007 02D2                  {
+; 0007 02D3                      gVolAdjCount++; //300ms
+	CALL SUBOPT_0x53
+; 0007 02D4                      if( gVolAdjCount > 3 )  //300ms*3
+	CALL SUBOPT_0x54
+	BRLT _0xE008B
+; 0007 02D5                      {
+; 0007 02D6                         gVolAdjCount = 0;
+	CALL SUBOPT_0x55
+; 0007 02D7                         gError &= ~(1<<ERROR_VOL);  //2.5V
+	ANDI R30,0xFE
+	STS  _gError,R30
+; 0007 02D8                      }
+; 0007 02D9                  }
+_0xE008B:
+; 0007 02DA                  else
+	RJMP _0xE008C
+_0xE008A:
+; 0007 02DB                  {
+; 0007 02DC                     gError &= ~(1<<ERROR_VOL);  //2.5V
+	LDS  R30,_gError
+	ANDI R30,0xFE
+	STS  _gError,R30
+; 0007 02DD                  }
+_0xE008C:
+; 0007 02DE               }
+; 0007 02DF               else
+	RJMP _0xE008D
+_0xE0087:
+; 0007 02E0               {
+; 0007 02E1                  gFlag = FLAG_VOLADJ;
+	LDI  R30,LOW(1)
+	STS  _gFlag,R30
+; 0007 02E2                  gVolAdjCount++; //300ms
+	CALL SUBOPT_0x53
+; 0007 02E3                  if( gVolAdjCount > 3 )  //300ms*3
+	CALL SUBOPT_0x54
+	BRLT _0xE008E
+; 0007 02E4                 {
+; 0007 02E5                     gVolAdjCount = 0;
+	CALL SUBOPT_0x55
+; 0007 02E6                     gError |= (1<<ERROR_VOL);
+	ORI  R30,1
+	CALL SUBOPT_0x2E
+; 0007 02E7                     gCurMode =  CUR_ERROR;
+; 0007 02E8                 }
+; 0007 02E9               }
+_0xE008E:
+_0xE008D:
+; 0007 02EA            }
+_0xE0084:
+; 0007 02EB          }
+; 0007 02EC          else
+	RJMP _0xE008F
+_0xE0082:
+; 0007 02ED          {
+; 0007 02EE            if( gVolChkCount > 0 )
+	CALL SUBOPT_0x4D
+	BRGE _0xE0090
+; 0007 02EF            {
+; 0007 02F0               gVolChkCount--;
+	LDI  R26,LOW(_gVolChkCount)
+	LDI  R27,HIGH(_gVolChkCount)
+	CALL SUBOPT_0x48
+; 0007 02F1            }
+; 0007 02F2            else
+	RJMP _0xE0091
+_0xE0090:
+; 0007 02F3            {
+; 0007 02F4               if(gVoltage < 20 ) mIndexVol = 0;
+	CALL SUBOPT_0xA
+	SBIW R26,20
+	BRGE _0xE0092
+	__GETWRN 16,17,0
+; 0007 02F5               else  mIndexVol = (gVoltage-20)/10;
+	RJMP _0xE0093
+_0xE0092:
+	CALL SUBOPT_0xA
+	CALL SUBOPT_0x2
+	MOVW R16,R30
+; 0007 02F6 
+; 0007 02F7               mCalvol = DacArray[mIndexVol];
+_0xE0093:
+	CALL SUBOPT_0x4E
+; 0007 02F8 
+; 0007 02F9              // mTemp = LowVolAdj[gVoltage/10-2];
+; 0007 02FA              // gReadVol =(int)(mTemp+20.0f+(float)mVol*0.68f);
+; 0007 02FB               if( (float)mVol > (mCalvol-mCalvol*0.2f) &&
+; 0007 02FC                   (float)mVol < (mCalvol+mCalvol*0.2f) )
+	PUSH R23
+	PUSH R22
+	PUSH R31
+	PUSH R30
 	CALL SUBOPT_0x51
 	CALL __SWAPD12
 	CALL __SUBF12
@@ -6539,543 +6345,436 @@ _0xE00CB:
 	CALL __CMPF12
 	BREQ PC+2
 	BRCC PC+2
-	RJMP _0xE00CD
+	RJMP _0xE0095
 	CALL SUBOPT_0x3
 	PUSH R23
 	PUSH R22
 	PUSH R31
 	PUSH R30
-	CALL SUBOPT_0x52
+	CALL SUBOPT_0x51
 	CALL __ADDF12
 	POP  R26
 	POP  R27
 	POP  R24
 	POP  R25
 	CALL __CMPF12
-	BRLO _0xE00CE
-_0xE00CD:
-	RJMP _0xE00CC
-_0xE00CE:
-; 0007 03B1               {
-; 0007 03B2 
-; 0007 03B3                  gFlag = FLAG_READY;
+	BRLO _0xE0096
+_0xE0095:
+	RJMP _0xE0094
+_0xE0096:
+; 0007 02FD               {
+; 0007 02FE                  gFlag = FLAG_READY;
+	CALL SUBOPT_0x52
+; 0007 02FF                  if( gError & (1<<ERROR_VOL) )
+	BREQ _0xE0097
+; 0007 0300                  {
+; 0007 0301                     gVolAdjCount++; //300ms
 	CALL SUBOPT_0x53
-; 0007 03B4                  if( gError & (1<<ERROR_VOL) )
-	BREQ _0xE00CF
-; 0007 03B5                  {
-; 0007 03B6                      gVolAdjCount++; //300ms
+; 0007 0302                     if( gVolAdjCount > 3 )  //300ms*3
 	CALL SUBOPT_0x54
-; 0007 03B7                      if( gVolAdjCount > 3 )  //300ms*3
+	BRLT _0xE0098
+; 0007 0303                     {
+; 0007 0304                       gVolAdjCount = 0;
 	CALL SUBOPT_0x55
-	BRLT _0xE00D0
-; 0007 03B8                      {
-; 0007 03B9                         gVolAdjCount = 0;
-	CALL SUBOPT_0x56
-; 0007 03BA                         gError &= ~(1<<ERROR_VOL);  //2.5V
+; 0007 0305                       gError &= ~(1<<ERROR_VOL);  //2.5V
 	ANDI R30,0xFE
 	STS  _gError,R30
-; 0007 03BB                      }
-; 0007 03BC                  }
-_0xE00D0:
-; 0007 03BD                  else
-	RJMP _0xE00D1
-_0xE00CF:
-; 0007 03BE                  {
-; 0007 03BF                     gError &= ~(1<<ERROR_VOL);  //2.5V
+; 0007 0306                     }
+; 0007 0307                  }
+_0xE0098:
+; 0007 0308                  else
+	RJMP _0xE0099
+_0xE0097:
+; 0007 0309                  {
+; 0007 030A                    gError &= ~(1<<ERROR_VOL);  //2.5V
 	LDS  R30,_gError
 	ANDI R30,0xFE
 	STS  _gError,R30
-; 0007 03C0                  }
-_0xE00D1:
-; 0007 03C1               }
-; 0007 03C2               else
-	RJMP _0xE00D2
-_0xE00CC:
-; 0007 03C3               {
-; 0007 03C4                  gFlag = FLAG_VOLADJ;
+; 0007 030B                  }
+_0xE0099:
+; 0007 030C               }
+; 0007 030D               else
+	RJMP _0xE009A
+_0xE0094:
+; 0007 030E               {
+; 0007 030F                 gFlag = FLAG_VOLADJ;
 	LDI  R30,LOW(1)
 	STS  _gFlag,R30
-; 0007 03C5                  gVolAdjCount++; //300ms
-	CALL SUBOPT_0x54
-; 0007 03C6                  if( gVolAdjCount > 3 )  //300ms*3
-	CALL SUBOPT_0x55
-	BRLT _0xE00D3
-; 0007 03C7                 {
-; 0007 03C8                     gVolAdjCount = 0;
-	CALL SUBOPT_0x56
-; 0007 03C9                     gError |= (1<<ERROR_VOL);
-	ORI  R30,1
-	CALL SUBOPT_0x2E
-; 0007 03CA                     gCurMode =  CUR_ERROR;
-; 0007 03CB                 }
-; 0007 03CC               }
-_0xE00D3:
-_0xE00D2:
-; 0007 03CD            }
-_0xE00C9:
-; 0007 03CE          }
-; 0007 03CF          else
-	RJMP _0xE00D4
-_0xE00C7:
-; 0007 03D0          {
-; 0007 03D1            if( gVolChkCount > 0 )
-	CALL SUBOPT_0x4D
-	BRGE _0xE00D5
-; 0007 03D2            {
-; 0007 03D3               gVolChkCount--;
-	CALL SUBOPT_0x4E
-; 0007 03D4            }
-; 0007 03D5            else
-	RJMP _0xE00D6
-_0xE00D5:
-; 0007 03D6            {
-; 0007 03D7               if(gVoltage < 20 ) mIndexVol = 0;
-	CALL SUBOPT_0xA
-	SBIW R26,20
-	BRGE _0xE00D7
-	__GETWRN 16,17,0
-; 0007 03D8               else  mIndexVol = (gVoltage-20)/10;
-	RJMP _0xE00D8
-_0xE00D7:
-	CALL SUBOPT_0xA
-	CALL SUBOPT_0x2
-	MOVW R16,R30
-; 0007 03D9 
-; 0007 03DA               mCalvol = DacArray[mIndexVol];
-_0xE00D8:
-	CALL SUBOPT_0x4F
-; 0007 03DB 
-; 0007 03DC              // mTemp = LowVolAdj[gVoltage/10-2];
-; 0007 03DD              // gReadVol =(int)(mTemp+20.0f+(float)mVol*0.68f);
-; 0007 03DE               if( (float)mVol > (mCalvol-mCalvol*0.2f) &&
-; 0007 03DF                   (float)mVol < (mCalvol+mCalvol*0.2f) )
-	PUSH R23
-	PUSH R22
-	PUSH R31
-	PUSH R30
-	CALL SUBOPT_0x52
-	CALL __SWAPD12
-	CALL __SUBF12
-	POP  R26
-	POP  R27
-	POP  R24
-	POP  R25
-	CALL __CMPF12
-	BREQ PC+2
-	BRCC PC+2
-	RJMP _0xE00DA
-	CALL SUBOPT_0x3
-	PUSH R23
-	PUSH R22
-	PUSH R31
-	PUSH R30
-	CALL SUBOPT_0x52
-	CALL __ADDF12
-	POP  R26
-	POP  R27
-	POP  R24
-	POP  R25
-	CALL __CMPF12
-	BRLO _0xE00DB
-_0xE00DA:
-	RJMP _0xE00D9
-_0xE00DB:
-; 0007 03E0               {
-; 0007 03E1                  gFlag = FLAG_READY;
+; 0007 0310                 gVolAdjCount++; //300ms
 	CALL SUBOPT_0x53
-; 0007 03E2                  if( gError & (1<<ERROR_VOL) )
-	BREQ _0xE00DC
-; 0007 03E3                  {
-; 0007 03E4                     gVolAdjCount++; //300ms
+; 0007 0311                 if( gVolAdjCount > 3 )  //300ms*3
 	CALL SUBOPT_0x54
-; 0007 03E5                     if( gVolAdjCount > 3 )  //300ms*3
+	BRLT _0xE009B
+; 0007 0312                 {
+; 0007 0313                    gVolAdjCount = 0;
 	CALL SUBOPT_0x55
-	BRLT _0xE00DD
-; 0007 03E6                     {
-; 0007 03E7                       gVolAdjCount = 0;
-	CALL SUBOPT_0x56
-; 0007 03E8                       gError &= ~(1<<ERROR_VOL);  //2.5V
-	ANDI R30,0xFE
-	STS  _gError,R30
-; 0007 03E9                     }
-; 0007 03EA                  }
-_0xE00DD:
-; 0007 03EB                  else
-	RJMP _0xE00DE
-_0xE00DC:
-; 0007 03EC                  {
-; 0007 03ED                    gError &= ~(1<<ERROR_VOL);  //2.5V
-	LDS  R30,_gError
-	ANDI R30,0xFE
-	STS  _gError,R30
-; 0007 03EE                  }
-_0xE00DE:
-; 0007 03EF               }
-; 0007 03F0               else
-	RJMP _0xE00DF
-_0xE00D9:
-; 0007 03F1               {
-; 0007 03F2                 gFlag = FLAG_VOLADJ;
-	LDI  R30,LOW(1)
-	STS  _gFlag,R30
-; 0007 03F3                 gVolAdjCount++; //300ms
-	CALL SUBOPT_0x54
-; 0007 03F4                 if( gVolAdjCount > 3 )  //300ms*3
-	CALL SUBOPT_0x55
-	BRLT _0xE00E0
-; 0007 03F5                 {
-; 0007 03F6                    gVolAdjCount = 0;
-	CALL SUBOPT_0x56
-; 0007 03F7                    gError |= (1<<ERROR_VOL);
+; 0007 0314                    gError |= (1<<ERROR_VOL);
 	ORI  R30,1
 	CALL SUBOPT_0x2E
-; 0007 03F8                    gCurMode =  CUR_ERROR;
-; 0007 03F9                 }
-; 0007 03FA               }
-_0xE00E0:
-_0xE00DF:
-; 0007 03FB            }
-_0xE00D6:
-; 0007 03FC          }
-_0xE00D4:
-; 0007 03FD 
-; 0007 03FE          if( IN_FET_SEN )
-	SBIS 0x10,4
-	RJMP _0xE00E1
-; 0007 03FF          {
-; 0007 0400             PORTC = 0x00;
-	LDI  R30,LOW(0)
-	OUT  0x15,R30
-; 0007 0401             gError |= (1<<ERROR_VOL);
-	LDS  R30,_gError
-	ORI  R30,1
-	CALL SUBOPT_0x2E
-; 0007 0402             gCurMode =  CUR_ERROR;
-; 0007 0403          }
-; 0007 0404 
-; 0007 0405       }
-_0xE00E1:
-; 0007 0406       else
-	RJMP _0xE00E2
-_0xE00C4:
-; 0007 0407       {
-; 0007 0408           gVolAdjCount = 0; //2020-09-04
+; 0007 0315                    gCurMode =  CUR_ERROR;
+; 0007 0316                 }
+; 0007 0317               }
+_0xE009B:
+_0xE009A:
+; 0007 0318            }
+_0xE0091:
+; 0007 0319          }
+_0xE008F:
+; 0007 031A       }
+; 0007 031B       else
+	RJMP _0xE009C
+_0xE007F:
+; 0007 031C       {
+; 0007 031D           gVolAdjCount = 0; //2020-09-04
 	LDI  R30,LOW(0)
 	STS  _gVolAdjCount,R30
 	STS  _gVolAdjCount+1,R30
-; 0007 0409       }
-_0xE00E2:
-; 0007 040A    }
-; 0007 040B    else if( gAdcLoc == 2 )
-	RJMP _0xE00E3
-_0xE00C3:
+; 0007 031E       }
+_0xE009C:
+; 0007 031F    }
+; 0007 0320    else if( gAdcLoc == 2 )
+	RJMP _0xE009D
+_0xE007E:
 	CALL SUBOPT_0x4C
 	SBIW R26,2
-	BRNE _0xE00E4
-; 0007 040C    {
-; 0007 040D       if( gRunFlag==TRUE && gElCompletFlag == TRUE )
+	BRNE _0xE009E
+; 0007 0321    {
+; 0007 0322       if( gRunFlag==TRUE && gElCompletFlag == TRUE )
 	LDS  R26,_gRunFlag
 	CPI  R26,LOW(0x1)
-	BRNE _0xE00E6
+	BRNE _0xE00A0
 	LDS  R26,_gElCompletFlag
 	CPI  R26,LOW(0x1)
-	BREQ _0xE00E7
-_0xE00E6:
-	RJMP _0xE00E5
-_0xE00E7:
-; 0007 040E       {
-; 0007 040F          gRunFlag = FALSE;
+	BREQ _0xE00A1
+_0xE00A0:
+	RJMP _0xE009F
+_0xE00A1:
+; 0007 0323       {
+; 0007 0324          gRunFlag = FALSE;
 	LDI  R30,LOW(0)
 	STS  _gRunFlag,R30
-; 0007 0410          if( mVol > 25)
+; 0007 0325          if( mVol > 25)
 	__CPWRN 18,19,26
-	BRLT _0xE00E8
-; 0007 0411          {
-; 0007 0412             gError &= ~(1<<ERROR_ELOUT);  //2.5V
+	BRLT _0xE00A2
+; 0007 0326          {
+; 0007 0327             gError &= ~(1<<ERROR_ELOUT);  //2.5V
 	LDS  R30,_gError
 	ANDI R30,0xFD
 	STS  _gError,R30
-; 0007 0413 
-; 0007 0414             gElCount++;
+; 0007 0328 
+; 0007 0329             gElCount++;
 	LDI  R26,LOW(_gElCount)
 	LDI  R27,HIGH(_gElCount)
 	CALL SUBOPT_0x35
-; 0007 0415             if( gElCount > 999 ) gElCount = 999;
+; 0007 032A             if( gElCount > 999 ) gElCount = 999;
 	LDS  R26,_gElCount
 	LDS  R27,_gElCount+1
 	CPI  R26,LOW(0x3E8)
 	LDI  R30,HIGH(0x3E8)
 	CPC  R27,R30
-	BRLT _0xE00E9
+	BRLT _0xE00A3
 	LDI  R30,LOW(999)
 	LDI  R31,HIGH(999)
 	CALL SUBOPT_0x11
-; 0007 0416             HIGH_COMPLETE_LED;
-_0xE00E9:
+; 0007 032B             HIGH_COMPLETE_LED;
+_0xE00A3:
 	LDS  R30,98
 	ORI  R30,0x80
 	STS  98,R30
-; 0007 0417          }
-; 0007 0418          else
-	RJMP _0xE00EA
-_0xE00E8:
-; 0007 0419          {
-; 0007 041A             gError |= (1<<ERROR_ELOUT);  //2.5V
+; 0007 032C          }
+; 0007 032D          else
+	RJMP _0xE00A4
+_0xE00A2:
+; 0007 032E          {
+; 0007 032F             gError |= (1<<ERROR_ELOUT);  //2.5V
 	LDS  R30,_gError
 	ORI  R30,2
 	CALL SUBOPT_0x2E
-; 0007 041B             gCurMode =  CUR_ERROR;
-; 0007 041C 
-; 0007 041D            // LOW_COMPLETE_LED;
-; 0007 041E          }
-_0xE00EA:
-; 0007 041F          HIGH_SH;
+; 0007 0330             gCurMode =  CUR_ERROR;
+; 0007 0331 
+; 0007 0332            // LOW_COMPLETE_LED;
+; 0007 0333          }
+_0xE00A4:
+; 0007 0334          HIGH_SH;
 	SBI  0x18,6
-; 0007 0420       }
-; 0007 0421    }
-_0xE00E5:
-; 0007 0422    gAdcLoc++;
-_0xE00E4:
-_0xE00E3:
-_0xE00C2:
+; 0007 0335       }
+; 0007 0336    }
+_0xE009F:
+; 0007 0337    gAdcLoc++;
+_0xE009E:
+_0xE009D:
+_0xE007D:
 	LDI  R26,LOW(_gAdcLoc)
 	LDI  R27,HIGH(_gAdcLoc)
 	CALL SUBOPT_0x35
-; 0007 0423    if( gAdcLoc > 2 ) gAdcLoc = 0;
+; 0007 0338    if( gAdcLoc > 2 ) gAdcLoc = 0;
 	CALL SUBOPT_0x4C
 	SBIW R26,3
-	BRLT _0xE00ED
+	BRLT _0xE00A7
 	LDI  R30,LOW(0)
 	STS  _gAdcLoc,R30
 	STS  _gAdcLoc+1,R30
-; 0007 0424 }
-_0xE00ED:
+; 0007 0339 }
+_0xE00A7:
 	CALL __LOADLOCR6
 	ADIW R28,10
 	RET
 ; .FEND
 ;
 ;void DisplayLed( void )
-; 0007 0427 {
+; 0007 033C {
 _DisplayLed:
 ; .FSTART _DisplayLed
-; 0007 0428     if( gError > ERROR_NO )
+; 0007 033D     if( gError > ERROR_NO )
 	LDS  R26,_gError
 	CPI  R26,LOW(0x1)
-	BRLO _0xE00EE
-; 0007 0429     {
-; 0007 042A        HIGH_WARRING_LED;
+	BRLO _0xE00A8
+; 0007 033E     {
+; 0007 033F        HIGH_WARRING_LED;
 	LDS  R30,98
 	ORI  R30,0x40
 	STS  98,R30
-; 0007 042B        LOW_COMPLETE_LED;
-	RJMP _0xE0103
-; 0007 042C     }
-; 0007 042D     else
-_0xE00EE:
-; 0007 042E     {
-; 0007 042F        LOW_WARRING_LED;
+; 0007 0340        LOW_COMPLETE_LED;
+	RJMP _0xE00C0
+; 0007 0341     }
+; 0007 0342     else
+_0xE00A8:
+; 0007 0343     {
+; 0007 0344        LOW_WARRING_LED;
 	LDS  R30,98
 	ANDI R30,0xBF
 	STS  98,R30
-; 0007 0430 
-; 0007 0431        if( gFlag == FLAG_COMPLETE )
+; 0007 0345 
+; 0007 0346        if( gFlag == FLAG_COMPLETE )
 	LDS  R26,_gFlag
 	CPI  R26,LOW(0x4)
-	BRNE _0xE00F0
-; 0007 0432              HIGH_COMPLETE_LED;
+	BRNE _0xE00AA
+; 0007 0347              HIGH_COMPLETE_LED;
 	LDS  R30,98
 	ORI  R30,0x80
-	RJMP _0xE0104
-; 0007 0433        else  LOW_COMPLETE_LED;
-_0xE00F0:
-_0xE0103:
+	RJMP _0xE00C1
+; 0007 0348        else  LOW_COMPLETE_LED;
+_0xE00AA:
+_0xE00C0:
 	LDS  R30,98
 	ANDI R30,0x7F
-_0xE0104:
+_0xE00C1:
 	STS  98,R30
-; 0007 0434     }
-; 0007 0435 }
+; 0007 0349     }
+; 0007 034A }
 	RET
 ; .FEND
 ;void UserProcessor( void )
-; 0007 0437 {
+; 0007 034C {
 _UserProcessor:
 ; .FSTART _UserProcessor
-; 0007 0438    if( gCurMode == CUR_INIT )
+; 0007 034D    if( gCurMode == CUR_INIT )
 	LDS  R30,_gCurMode
 	CPI  R30,0
-	BRNE _0xE00F2
-; 0007 0439    {
-; 0007 043A       DAC7611_WriteVoltage(0);
+	BRNE _0xE00AC
+; 0007 034E    {
+; 0007 034F       DAC7611_WriteVoltage(0);
 	LDI  R26,LOW(0)
 	LDI  R27,0
 	CALL SUBOPT_0x2A
-; 0007 043B       LOW_PWM;
+; 0007 0350       LOW_PWM;
 	ANDI R30,0XF7
 	STS  101,R30
-; 0007 043C       LOW_OUTRY;
+; 0007 0351       LOW_OUTRY;
 	LDS  R30,101
 	ANDI R30,0xEF
 	STS  101,R30
-; 0007 043D       gMode = MODE_STOP;
+; 0007 0352       gMode = MODE_STOP;
 	LDI  R30,LOW(0)
 	STS  _gMode,R30
-; 0007 043E       gFlag = FLAG_STADNBY;
+; 0007 0353       gFlag = FLAG_STADNBY;
 	STS  _gFlag,R30
-; 0007 043F 
-; 0007 0440       gCurMode = CUR_OK;
+; 0007 0354 
+; 0007 0355       gCurMode = CUR_OK;
 	LDI  R30,LOW(1)
 	STS  _gCurMode,R30
-; 0007 0441 
-; 0007 0442      // LOW_COMPLETE_LED;
-; 0007 0443      // LOW_WARRING_LED;
-; 0007 0444    }
-; 0007 0445    else if( gCurMode == CUR_OK )
-	RJMP _0xE00F3
-_0xE00F2:
+; 0007 0356 
+; 0007 0357      // LOW_COMPLETE_LED;
+; 0007 0358      // LOW_WARRING_LED;
+; 0007 0359    }
+; 0007 035A    else if( gCurMode == CUR_OK )
+	RJMP _0xE00AD
+_0xE00AC:
 	LDS  R26,_gCurMode
 	CPI  R26,LOW(0x1)
-	BRNE _0xE00F4
-; 0007 0446    {
-; 0007 0447        ADCProcessor();
+	BRNE _0xE00AE
+; 0007 035B    {
+; 0007 035C        ADCProcessor();
 	RCALL _ADCProcessor
-; 0007 0448        DisplayLed();
+; 0007 035D        DisplayLed();
 	RCALL _DisplayLed
-; 0007 0449    }
-; 0007 044A    else if( gCurMode == CUR_ERROR )
-	RJMP _0xE00F5
-_0xE00F4:
+; 0007 035E    }
+; 0007 035F    else if( gCurMode == CUR_ERROR )
+	RJMP _0xE00AF
+_0xE00AE:
 	LDS  R26,_gCurMode
 	CPI  R26,LOW(0x2)
-	BRNE _0xE00F6
-; 0007 044B    {
-; 0007 044C        gCurMode = CUR_INIT;
+	BRNE _0xE00B0
+; 0007 0360    {
+; 0007 0361        gCurMode = CUR_INIT;
 	LDI  R30,LOW(0)
 	STS  _gCurMode,R30
-; 0007 044D        // gInitCount = 0;
-; 0007 044E        LOW_COMPLETE_LED;
+; 0007 0362        // gInitCount = 0;
+; 0007 0363        LOW_COMPLETE_LED;
 	LDS  R30,98
 	ANDI R30,0x7F
 	STS  98,R30
-; 0007 044F        HIGH_WARRING_LED;
+; 0007 0364        HIGH_WARRING_LED;
 	LDS  R30,98
 	ORI  R30,0x40
 	STS  98,R30
-; 0007 0450    }
-; 0007 0451 }
-_0xE00F6:
-_0xE00F5:
-_0xE00F3:
+; 0007 0365    }
+; 0007 0366 }
+_0xE00B0:
+_0xE00AF:
+_0xE00AD:
 	RET
 ; .FEND
 ;
 ;void main()
-; 0007 0454 {
+; 0007 0369 {
 _main:
 ; .FSTART _main
-; 0007 0455    BYTE wEvent;
-; 0007 0456    int mTimeUart0,mTimeUart1;
-; 0007 0457 
-; 0007 0458    SystemInit( );
+; 0007 036A    BYTE wEvent;
+; 0007 036B    int mTimeUart0,mTimeUart1;
+; 0007 036C 
+; 0007 036D    SystemInit( );
 ;	wEvent -> R17
 ;	mTimeUart0 -> R18,R19
 ;	mTimeUart1 -> R20,R21
 	RCALL _SystemInit
-; 0007 0459 
-; 0007 045A    mTimeUart0 = mTimeUart1 = 0;
+; 0007 036E 
+; 0007 036F    mTimeUart0 = mTimeUart1 = 0;
 	LDI  R30,LOW(0)
 	LDI  R31,HIGH(0)
 	MOVW R20,R30
 	MOVW R18,R30
-; 0007 045B    // Global enable interrupts
-; 0007 045C    #asm("sei");
+; 0007 0370    // Global enable interrupts
+; 0007 0371    #asm("sei");
 	sei
-; 0007 045D 
-; 0007 045E    while ( TRUE )
-_0xE00F7:
-; 0007 045F    {
-; 0007 0460       wEvent = WaitEvent();
+; 0007 0372 
+; 0007 0373    while ( TRUE )
+_0xE00B1:
+; 0007 0374    {
+; 0007 0375       wEvent = WaitEvent();
 	RCALL _WaitEvent
 	MOV  R17,R30
-; 0007 0461       if( wEvent == EVN_RCVUART0 )
+; 0007 0376       if( wEvent == EVN_RCVUART0 )
 	CPI  R17,1
-	BRNE _0xE00FA
-; 0007 0462       {
-; 0007 0463           IPC_RunProcess0( );  //handle
+	BRNE _0xE00B4
+; 0007 0377       {
+; 0007 0378           IPC_RunProcess0( );  //handle
 	CALL _IPC_RunProcess0
-; 0007 0464           mTimeUart0 = 0;
+; 0007 0379           mTimeUart0 = 0;
 	__GETWRN 18,19,0
-; 0007 0465           gError &= ~(1<<ERROR_NOTHANDLE);
+; 0007 037A           gError &= ~(1<<ERROR_NOTHANDLE);
 	LDS  R30,_gError
 	ANDI R30,0xDF
 	STS  _gError,R30
-; 0007 0466       }
-; 0007 0467       else if( wEvent == EVN_RCVUART1 )
-	RJMP _0xE00FB
-_0xE00FA:
+; 0007 037B       }
+; 0007 037C       else if( wEvent == EVN_RCVUART1 )
+	RJMP _0xE00B5
+_0xE00B4:
 	CPI  R17,2
-	BRNE _0xE00FC
-; 0007 0468       {
-; 0007 0469           IPC_RunProcess1( );  //LCD Pannel
+	BRNE _0xE00B6
+; 0007 037D       {
+; 0007 037E           IPC_RunProcess1( );  //LCD Pannel
 	CALL _IPC_RunProcess1
-; 0007 046A           mTimeUart1 = 0;
+; 0007 037F           mTimeUart1 = 0;
 	__GETWRN 20,21,0
-; 0007 046B           gError &= ~(1<<ERROR_NOTLCD);
+; 0007 0380           gError &= ~(1<<ERROR_NOTLCD);
 	LDS  R30,_gError
 	ANDI R30,0xBF
 	STS  _gError,R30
-; 0007 046C       }
-; 0007 046D       else if(wEvent == EVN_TIMEOVER )
-	RJMP _0xE00FD
-_0xE00FC:
+; 0007 0381       }
+; 0007 0382       else if(wEvent == EVN_TIMEOVER )
+	RJMP _0xE00B7
+_0xE00B6:
 	CPI  R17,3
-	BRNE _0xE00FE
-; 0007 046E       {
-; 0007 046F           UserProcessor();
+	BRNE _0xE00B8
+; 0007 0383       {
+; 0007 0384         UserProcessor();
 	RCALL _UserProcessor
-; 0007 0470 
-; 0007 0471           if( ++mTimeUart0 > 7 ) //2.1sec
+; 0007 0385 
+; 0007 0386         if( ++mTimeUart0 > 7 ) //2.1sec
 	MOVW R30,R18
 	ADIW R30,1
 	MOVW R18,R30
 	SBIW R30,8
-	BRLT _0xE00FF
-; 0007 0472           {
-; 0007 0473              mTimeUart0 = 0;
+	BRLT _0xE00B9
+; 0007 0387         {
+; 0007 0388             mTimeUart0 = 0;
 	__GETWRN 18,19,0
-; 0007 0474              gError |= (1<<ERROR_NOTHANDLE);
+; 0007 0389             gError |= (1<<ERROR_NOTHANDLE);
 	LDS  R30,_gError
 	ORI  R30,0x20
 	CALL SUBOPT_0x2E
-; 0007 0475              gCurMode = CUR_ERROR;
-; 0007 0476           }
-; 0007 0477           if( ++mTimeUart1 > 7 ) //2.1sec
-_0xE00FF:
+; 0007 038A             gCurMode = CUR_ERROR;
+; 0007 038B         }
+; 0007 038C         if( ++mTimeUart1 > 7 ) //2.1sec
+_0xE00B9:
 	MOVW R30,R20
 	ADIW R30,1
 	MOVW R20,R30
 	SBIW R30,8
-	BRLT _0xE0100
-; 0007 0478           {
-; 0007 0479              mTimeUart1 = 0;
+	BRLT _0xE00BA
+; 0007 038D         {
+; 0007 038E             mTimeUart1 = 0;
 	__GETWRN 20,21,0
-; 0007 047A              gError |= (1<<ERROR_NOTLCD);
+; 0007 038F             gError |= (1<<ERROR_NOTLCD);
 	LDS  R30,_gError
 	ORI  R30,0x40
 	CALL SUBOPT_0x2E
-; 0007 047B              gCurMode = CUR_ERROR;
-; 0007 047C           }
-; 0007 047D       }
-_0xE0100:
-; 0007 047E    }
-_0xE00FE:
-_0xE00FD:
-_0xE00FB:
-	RJMP _0xE00F7
-; 0007 047F }
-_0xE0101:
-	RJMP _0xE0101
+; 0007 0390             gCurMode = CUR_ERROR;
+; 0007 0391         }
+; 0007 0392 
+; 0007 0393         //yjw add 2021.04.03
+; 0007 0394         //set volatge2
+; 0007 0395         if(!gSetVolagteInitTime &&  gRunFlag==FALSE)
+_0xE00BA:
+	LDS  R30,_gSetVolagteInitTime
+	LDS  R31,_gSetVolagteInitTime+1
+	SBIW R30,0
+	BRNE _0xE00BC
+	LDS  R26,_gRunFlag
+	CPI  R26,LOW(0x0)
+	BREQ _0xE00BD
+_0xE00BC:
+	RJMP _0xE00BB
+_0xE00BD:
+; 0007 0396         {
+; 0007 0397             if( IN_FET_SEN )
+	SBIS 0x10,4
+	RJMP _0xE00BE
+; 0007 0398             {
+; 0007 0399                 PORTC = 0x00;
+	LDI  R30,LOW(0)
+	OUT  0x15,R30
+; 0007 039A                 gError |= (1<<ERROR_VOL);
+	LDS  R30,_gError
+	ORI  R30,1
+	CALL SUBOPT_0x2E
+; 0007 039B                 gCurMode =  CUR_ERROR;
+; 0007 039C             }
+; 0007 039D         }
+_0xE00BE:
+; 0007 039E 
+; 0007 039F 
+; 0007 03A0       }
+_0xE00BB:
+; 0007 03A1    }
+_0xE00B8:
+_0xE00B7:
+_0xE00B5:
+	RJMP _0xE00B1
+; 0007 03A2 }
+_0xE00BF:
+	RJMP _0xE00BF
 ; .FEND
 ;
 	#ifndef __SLEEP_DEFINED__
@@ -7111,6 +6810,7 @@ memset0:
 memset1:
     ldd  r30,y+3
     ldd  r31,y+4
+_0x20A0001:
 	ADIW R28,5
 	RET
 ; .FEND
@@ -7185,6 +6885,14 @@ _gCalValue0:
 _gCalValue1:
 	.BYTE 0x2
 _gDutyOff:
+	.BYTE 0x2
+_gShotCnt:
+	.BYTE 0x1
+_gShotWaitTime:
+	.BYTE 0x2
+_gShotGapWaitTime:
+	.BYTE 0x2
+_gSetVolagteInitTime:
 	.BYTE 0x2
 _gShift:
 	.BYTE 0x2
@@ -7681,7 +7389,7 @@ SUBOPT_0x34:
 	LD   R26,X
 	RET
 
-;OPTIMIZER ADDED SUBROUTINE, CALLED 19 TIMES, CODE SIZE REDUCTION:51 WORDS
+;OPTIMIZER ADDED SUBROUTINE, CALLED 17 TIMES, CODE SIZE REDUCTION:45 WORDS
 SUBOPT_0x35:
 	LD   R30,X+
 	LD   R31,X+
@@ -7690,36 +7398,68 @@ SUBOPT_0x35:
 	ST   -X,R30
 	RET
 
-;OPTIMIZER ADDED SUBROUTINE, CALLED 3 TIMES, CODE SIZE REDUCTION:5 WORDS
+;OPTIMIZER ADDED SUBROUTINE, CALLED 3 TIMES, CODE SIZE REDUCTION:1 WORDS
 SUBOPT_0x36:
+	LDI  R30,LOW(224)
+	OUT  0x2D,R30
+	LDI  R30,LOW(192)
+	OUT  0x2C,R30
+	RET
+
+;OPTIMIZER ADDED SUBROUTINE, CALLED 4 TIMES, CODE SIZE REDUCTION:9 WORDS
+SUBOPT_0x37:
 	LDS  R30,_gElLoc
 	LDS  R31,_gElLoc+1
 	SUBI R30,LOW(-_gElMatrix)
 	SBCI R31,HIGH(-_gElMatrix)
 	RET
 
-;OPTIMIZER ADDED SUBROUTINE, CALLED 3 TIMES, CODE SIZE REDUCTION:1 WORDS
-SUBOPT_0x37:
+;OPTIMIZER ADDED SUBROUTINE, CALLED 2 TIMES, CODE SIZE REDUCTION:10 WORDS
+SUBOPT_0x38:
+	LD   R30,Z
+	SWAP R30
+	ANDI R30,0xF0
+	LDI  R31,0
+	STS  _gCalValue0,R30
+	STS  _gCalValue0+1,R31
+	LDI  R30,LOW(0)
+	STS  _gCalValue1,R30
+	STS  _gCalValue1+1,R30
+	__GETWRN 16,17,0
+	RET
+
+;OPTIMIZER ADDED SUBROUTINE, CALLED 2 TIMES, CODE SIZE REDUCTION:1 WORDS
+SUBOPT_0x39:
+	LD   R1,Z
+	MOV  R30,R16
+	LDI  R26,LOW(8)
+	CALL __LSRB12
+	AND  R30,R1
+	RET
+
+;OPTIMIZER ADDED SUBROUTINE, CALLED 2 TIMES, CODE SIZE REDUCTION:3 WORDS
+SUBOPT_0x3A:
+	__PUTWMRN _gShift,0,16,17
 	LDI  R26,LOW(_gShift)
 	LDI  R27,HIGH(_gShift)
 	RJMP SUBOPT_0x35
 
-;OPTIMIZER ADDED SUBROUTINE, CALLED 3 TIMES, CODE SIZE REDUCTION:3 WORDS
-SUBOPT_0x38:
+;OPTIMIZER ADDED SUBROUTINE, CALLED 6 TIMES, CODE SIZE REDUCTION:12 WORDS
+SUBOPT_0x3B:
 	LDS  R26,_gShift
 	LDS  R27,_gShift+1
 	SBIW R26,4
 	RET
 
-;OPTIMIZER ADDED SUBROUTINE, CALLED 3 TIMES, CODE SIZE REDUCTION:3 WORDS
-SUBOPT_0x39:
+;OPTIMIZER ADDED SUBROUTINE, CALLED 6 TIMES, CODE SIZE REDUCTION:12 WORDS
+SUBOPT_0x3C:
 	LDI  R30,LOW(0)
 	STS  _gShift,R30
 	STS  _gShift+1,R30
 	RET
 
-;OPTIMIZER ADDED SUBROUTINE, CALLED 3 TIMES, CODE SIZE REDUCTION:11 WORDS
-SUBOPT_0x3A:
+;OPTIMIZER ADDED SUBROUTINE, CALLED 6 TIMES, CODE SIZE REDUCTION:32 WORDS
+SUBOPT_0x3D:
 	LDS  R30,_gShift
 	LDI  R26,LOW(8)
 	CALL __LSRB12
@@ -7729,37 +7469,47 @@ SUBOPT_0x3A:
 	RET
 
 ;OPTIMIZER ADDED SUBROUTINE, CALLED 2 TIMES, CODE SIZE REDUCTION:1 WORDS
-SUBOPT_0x3B:
+SUBOPT_0x3E:
 	LDI  R30,LOW(1)
 	LDI  R31,HIGH(1)
 	STS  _gCurState,R30
 	STS  _gCurState+1,R31
 	RET
 
-;OPTIMIZER ADDED SUBROUTINE, CALLED 17 TIMES, CODE SIZE REDUCTION:29 WORDS
-SUBOPT_0x3C:
+;OPTIMIZER ADDED SUBROUTINE, CALLED 10 TIMES, CODE SIZE REDUCTION:15 WORDS
+SUBOPT_0x3F:
 	LDS  R26,_gCurState
 	LDS  R27,_gCurState+1
 	RET
 
-;OPTIMIZER ADDED SUBROUTINE, CALLED 2 TIMES, CODE SIZE REDUCTION:1 WORDS
-SUBOPT_0x3D:
+;OPTIMIZER ADDED SUBROUTINE, CALLED 2 TIMES, CODE SIZE REDUCTION:4 WORDS
+SUBOPT_0x40:
+	LDS  R30,_gCalValue1
+	OUT  0x15,R30
 	LDI  R30,LOW(2)
 	LDI  R31,HIGH(2)
 	STS  _gCurState,R30
 	STS  _gCurState+1,R31
 	RET
 
+;OPTIMIZER ADDED SUBROUTINE, CALLED 4 TIMES, CODE SIZE REDUCTION:3 WORDS
+SUBOPT_0x41:
+	LDI  R26,LOW(_gShift)
+	LDI  R27,HIGH(_gShift)
+	RJMP SUBOPT_0x35
+
 ;OPTIMIZER ADDED SUBROUTINE, CALLED 2 TIMES, CODE SIZE REDUCTION:1 WORDS
-SUBOPT_0x3E:
+SUBOPT_0x42:
 	LDI  R30,LOW(3)
 	LDI  R31,HIGH(3)
 	STS  _gCurState,R30
 	STS  _gCurState+1,R31
 	RET
 
-;OPTIMIZER ADDED SUBROUTINE, CALLED 2 TIMES, CODE SIZE REDUCTION:1 WORDS
-SUBOPT_0x3F:
+;OPTIMIZER ADDED SUBROUTINE, CALLED 2 TIMES, CODE SIZE REDUCTION:4 WORDS
+SUBOPT_0x43:
+	LDS  R30,_gCalValue1
+	OUT  0x15,R30
 	LDI  R30,LOW(4)
 	LDI  R31,HIGH(4)
 	STS  _gCurState,R30
@@ -7767,78 +7517,57 @@ SUBOPT_0x3F:
 	RET
 
 ;OPTIMIZER ADDED SUBROUTINE, CALLED 2 TIMES, CODE SIZE REDUCTION:1 WORDS
-SUBOPT_0x40:
+SUBOPT_0x44:
 	LDI  R30,LOW(5)
 	LDI  R31,HIGH(5)
 	STS  _gCurState,R30
 	STS  _gCurState+1,R31
 	RET
 
-;OPTIMIZER ADDED SUBROUTINE, CALLED 7 TIMES, CODE SIZE REDUCTION:15 WORDS
-SUBOPT_0x41:
-	LDI  R30,LOW(0)
-	STS  _gDutyOff,R30
-	STS  _gDutyOff+1,R30
-	RET
-
-;OPTIMIZER ADDED SUBROUTINE, CALLED 2 TIMES, CODE SIZE REDUCTION:1 WORDS
-SUBOPT_0x42:
-	LDI  R30,LOW(6)
-	LDI  R31,HIGH(6)
-	STS  _gCurState,R30
-	STS  _gCurState+1,R31
-	RET
-
-;OPTIMIZER ADDED SUBROUTINE, CALLED 7 TIMES, CODE SIZE REDUCTION:9 WORDS
-SUBOPT_0x43:
-	LDI  R26,LOW(_gDutyOff)
-	LDI  R27,HIGH(_gDutyOff)
-	RJMP SUBOPT_0x35
-
-;OPTIMIZER ADDED SUBROUTINE, CALLED 7 TIMES, CODE SIZE REDUCTION:9 WORDS
-SUBOPT_0x44:
-	LDS  R26,_gDutyOff
-	LDS  R27,_gDutyOff+1
-	RET
-
-;OPTIMIZER ADDED SUBROUTINE, CALLED 2 TIMES, CODE SIZE REDUCTION:4 WORDS
+;OPTIMIZER ADDED SUBROUTINE, CALLED 2 TIMES, CODE SIZE REDUCTION:2 WORDS
 SUBOPT_0x45:
-	LDI  R30,LOW(0)
-	STS  _gCurState,R30
-	STS  _gCurState+1,R30
+	LDS  R30,_gCalValue1
+	OUT  0x15,R30
 	LDI  R26,LOW(_gElLoc)
 	LDI  R27,HIGH(_gElLoc)
 	RJMP SUBOPT_0x35
 
 ;OPTIMIZER ADDED SUBROUTINE, CALLED 2 TIMES, CODE SIZE REDUCTION:5 WORDS
 SUBOPT_0x46:
+	LDS  R30,_gShotCnt
+	SUBI R30,-LOW(1)
+	STS  _gShotCnt,R30
 	LDI  R30,LOW(0)
-	OUT  0x15,R30
 	STS  _gElLoc,R30
 	STS  _gElLoc+1,R30
+	RET
+
+;OPTIMIZER ADDED SUBROUTINE, CALLED 2 TIMES, CODE SIZE REDUCTION:6 WORDS
+SUBOPT_0x47:
+	LDI  R30,LOW(0)
+	STS  _gShotCnt,R30
+	STS  _gShotWaitTime,R30
+	STS  _gShotWaitTime+1,R30
 	LDI  R30,LOW(1)
 	STS  _gElCompletFlag,R30
 	RET
 
 ;OPTIMIZER ADDED SUBROUTINE, CALLED 4 TIMES, CODE SIZE REDUCTION:6 WORDS
-SUBOPT_0x47:
-	LDS  R30,_gCalValue0
-	OUT  0x15,R30
-	RJMP SUBOPT_0x43
-
-;OPTIMIZER ADDED SUBROUTINE, CALLED 5 TIMES, CODE SIZE REDUCTION:5 WORDS
 SUBOPT_0x48:
-	STS  _gCurState,R30
-	STS  _gCurState+1,R31
+	LD   R30,X+
+	LD   R31,X+
+	SBIW R30,1
+	ST   -X,R31
+	ST   -X,R30
 	RET
 
-;OPTIMIZER ADDED SUBROUTINE, CALLED 3 TIMES, CODE SIZE REDUCTION:1 WORDS
+;OPTIMIZER ADDED SUBROUTINE, CALLED 2 TIMES, CODE SIZE REDUCTION:1 WORDS
 SUBOPT_0x49:
 	LDI  R30,LOW(0)
 	OUT  0x2F,R30
 	LDI  R30,LOW(1)
 	OUT  0x2E,R30
-	RET
+	RJMP SUBOPT_0x36
 
 ;OPTIMIZER ADDED SUBROUTINE, CALLED 2 TIMES, CODE SIZE REDUCTION:7 WORDS
 SUBOPT_0x4A:
@@ -7873,19 +7602,8 @@ SUBOPT_0x4D:
 	CALL __CPW02
 	RET
 
-;OPTIMIZER ADDED SUBROUTINE, CALLED 2 TIMES, CODE SIZE REDUCTION:2 WORDS
-SUBOPT_0x4E:
-	LDI  R26,LOW(_gVolChkCount)
-	LDI  R27,HIGH(_gVolChkCount)
-	LD   R30,X+
-	LD   R31,X+
-	SBIW R30,1
-	ST   -X,R31
-	ST   -X,R30
-	RET
-
 ;OPTIMIZER ADDED SUBROUTINE, CALLED 2 TIMES, CODE SIZE REDUCTION:10 WORDS
-SUBOPT_0x4F:
+SUBOPT_0x4E:
 	MOVW R30,R16
 	LDI  R26,LOW(_DacArray*2)
 	LDI  R27,HIGH(_DacArray*2)
@@ -7897,23 +7615,23 @@ SUBOPT_0x4F:
 	RJMP SUBOPT_0x3
 
 ;OPTIMIZER ADDED SUBROUTINE, CALLED 8 TIMES, CODE SIZE REDUCTION:11 WORDS
-SUBOPT_0x50:
+SUBOPT_0x4F:
 	__GETD2S 6
 	RET
 
 ;OPTIMIZER ADDED SUBROUTINE, CALLED 4 TIMES, CODE SIZE REDUCTION:15 WORDS
-SUBOPT_0x51:
+SUBOPT_0x50:
 	__GETD1N 0x3E4CCCCD
 	CALL __MULF12
-	RJMP SUBOPT_0x50
+	RJMP SUBOPT_0x4F
 
 ;OPTIMIZER ADDED SUBROUTINE, CALLED 3 TIMES, CODE SIZE REDUCTION:1 WORDS
-SUBOPT_0x52:
-	RCALL SUBOPT_0x50
-	RJMP SUBOPT_0x51
+SUBOPT_0x51:
+	RCALL SUBOPT_0x4F
+	RJMP SUBOPT_0x50
 
 ;OPTIMIZER ADDED SUBROUTINE, CALLED 2 TIMES, CODE SIZE REDUCTION:1 WORDS
-SUBOPT_0x53:
+SUBOPT_0x52:
 	LDI  R30,LOW(2)
 	STS  _gFlag,R30
 	LDS  R30,_gError
@@ -7921,20 +7639,20 @@ SUBOPT_0x53:
 	RET
 
 ;OPTIMIZER ADDED SUBROUTINE, CALLED 4 TIMES, CODE SIZE REDUCTION:3 WORDS
-SUBOPT_0x54:
+SUBOPT_0x53:
 	LDI  R26,LOW(_gVolAdjCount)
 	LDI  R27,HIGH(_gVolAdjCount)
 	RJMP SUBOPT_0x35
 
 ;OPTIMIZER ADDED SUBROUTINE, CALLED 4 TIMES, CODE SIZE REDUCTION:6 WORDS
-SUBOPT_0x55:
+SUBOPT_0x54:
 	LDS  R26,_gVolAdjCount
 	LDS  R27,_gVolAdjCount+1
 	SBIW R26,4
 	RET
 
 ;OPTIMIZER ADDED SUBROUTINE, CALLED 4 TIMES, CODE SIZE REDUCTION:12 WORDS
-SUBOPT_0x56:
+SUBOPT_0x55:
 	LDI  R30,LOW(0)
 	STS  _gVolAdjCount,R30
 	STS  _gVolAdjCount+1,R30

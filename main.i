@@ -385,6 +385,13 @@ int  gCurState=0;
 int  gCalValue0,gCalValue1;
 int  gDutyOff=0;
 BYTE gElCompletFlag = 0;
+
+BYTE gShotCnt =0;
+int gShotWaitTime =0;
+int gShotGapWaitTime =0;
+
+int gSetVolagteInitTime = 5000;
+
 int  gShift=0;
 
 int  gVolAdjCount=0;
@@ -406,302 +413,26 @@ TCNT0 = 0x06;
 gTime1ms++;    
 }
 
-void PulseGenerator1( void )
-{
-
-TCNT1H=0xB1E0 >> 8;           
-TCNT1L=0xB1E0 & 0xff;
-
-if( gRunFlag==1 && gElCompletFlag == 0 )
-{ 
-if( gCurState == 0 )
-{                
-gCalValue0 = gElMatrix[gElLoc]<<4 |(~gElMatrix[gElLoc])&0x0f; 
-gCalValue1 = gCalValue0&0x0f; 
-
-PORTC = gCalValue0;   
-gCurState = 1;  
-}      
-else if( gCurState == 1 )
-{
-PORTC = gCalValue1;             
-gCurState = 2;
-}                        
-else if( gCurState == 2 )
-{         
-PORTC = gCalValue0;         
-gCurState = 3;       
-}
-else if( gCurState == 3 )
-{
-PORTC = gCalValue1;               
-gCurState = 4;      
-}
-else if( gCurState == 4 )
-{
-PORTC = gCalValue0;         
-gCurState = 5;         
-}                    
-else if( gCurState == 5 )
-{              
-gDutyOff = 0;
-PORTC = gCalValue1;         
-gCurState = 6;        
-}                                     
-else if( gCurState == 6 )
-{    
-gDutyOff++;
-if( gDutyOff >8)  
-{ 
-gCurState = 0;
-gElLoc++;   
-if( gElLoc > 3 )
-{  
-PORTC = 0;
-gElLoc = 0;
-gElCompletFlag = 1;
-}
-}        
-}
-}
-}
-
-void PulseGenerator2( void )
-{
-
-TCNT1H=0xE013 >> 8;          
-TCNT1L=0xE013 & 0xff;
-
-if( gRunFlag==1 && gElCompletFlag == 0 )
-{ 
-if( gCurState == 0 )
-{                
-gCalValue0 = gElMatrix[gElLoc]<<4 |(~gElMatrix[gElLoc])&0x0f; 
-gCalValue1 = gCalValue0&0x0f; 
-
-PORTC = gCalValue0;  
-gDutyOff = 0; 
-gCurState = 1;  
-}                        
-else if( gCurState == 1 )
-{
-gDutyOff++;
-if( gDutyOff >10 ) gCurState = 2;
-}      
-else if( gCurState == 2 )
-{                 
-gDutyOff = 0; 
-PORTC = gCalValue1;             
-gCurState = 3;
-}                        
-else if( gCurState == 3 )
-{         
-PORTC = gCalValue0; 
-gDutyOff++;
-if( gDutyOff >11) gCurState = 4;       
-}
-else if( gCurState == 4 )
-{            
-gDutyOff = 0; 
-PORTC = gCalValue1;               
-gCurState = 5;      
-} 
-else if( gCurState == 5 )
-{    
-gDutyOff++;
-if( gDutyOff >297)     
-{    
-gCurState = 0;
-gElLoc++;   
-if( gElLoc > 3 )
-{     
-PORTC = 0x00; 
-gElLoc = 0;
-gElCompletFlag = 1;
-}
-}        
-}
-}    
-}
-
-void PulseGenerator3( void )
-{
-
-TCNT1H=0xE700 >> 8;          
-TCNT1L=0xE700 & 0xff;
-
-if( gRunFlag==1 && gElCompletFlag == 0 )
-{ 
-if( gCurState == 0 )
-{                
-gCalValue0 = gElMatrix[gElLoc]<<4 |(~gElMatrix[gElLoc])&0x0f; 
-gCalValue1 = gCalValue0&0x0f; 
-
-PORTC = gCalValue0;  
-gDutyOff = 0; 
-
-gCurState = 1;
-}      
-else if( gCurState == 1 )
-{       
-gDutyOff++;
-if( gDutyOff >47 )gCurState = 2;
-
-}                        
-else if( gCurState == 2 )
-{             
-gDutyOff = 0;
-PORTC = gCalValue1;             
-gCurState = 3;
-}
-else if( gCurState == 3 )
-{                
-PORTC = gCalValue0; 
-gDutyOff++;
-if( gDutyOff >47 )gCurState = 4;                           
-}
-else if( gCurState == 4 )
-{  
-gDutyOff = 0;
-PORTC = gCalValue1;               
-gCurState = 5;      
-}
-else if( gCurState == 5 )
-{
-PORTC = gCalValue0;  
-gDutyOff++;
-if( gDutyOff >47 ) gCurState = 6;       
-}                    
-else if( gCurState == 6 )
-{              
-gDutyOff = 0;
-PORTC = gCalValue1;         
-gCurState = 7;        
-}                                     
-else if( gCurState == 7 )
-{    
-gDutyOff++;
-if( gDutyOff >246)  
-{ 
-gCurState = 0;
-gElLoc++;   
-if( gElLoc > 3 )
-{         
-PORTC = 0;
-gElLoc = 0;
-gElCompletFlag = 1;
-}
-}        
-}
-}
-}
-
-void PulseGenerator4( void )
-{
-
-TCNT1H=0xE013 >> 8;          
-TCNT1L=0xE013 & 0xff;
-
-if( gRunFlag==1 && gElCompletFlag == 0 )
-{ 
-if( gCurState == 0 )
-{                
-gCalValue0 = gElMatrix[gElLoc]<<4 |(~gElMatrix[gElLoc])&0x0f; 
-gCalValue1 = gCalValue0&0x0f; 
-
-PORTC = gCalValue0;  
-gDutyOff = 0; 
-gCurState = 1;  
-}                        
-else if( gCurState == 1 )
-{
-gDutyOff++;
-if( gDutyOff >11 )gCurState = 2;
-}      
-else if( gCurState == 2 )
-{                 
-gDutyOff = 0; 
-PORTC = gCalValue1;             
-gCurState = 3;
-}                        
-else if( gCurState == 3 )
-{         
-PORTC = gCalValue0;
-gDutyOff++; 
-if( gDutyOff >11) gCurState = 4;       
-}
-else if( gCurState == 4 )
-{            
-gDutyOff = 0; 
-PORTC = gCalValue1;               
-gCurState = 5;      
-}
-else if( gCurState == 5 )
-{         
-PORTC = gCalValue0; 
-gDutyOff++;
-if( gDutyOff >11) gCurState = 6;       
-}
-else if( gCurState == 6 )
-{            
-gDutyOff = 0; 
-PORTC = gCalValue1;               
-gCurState = 7;      
-} 
-else if( gCurState == 7 )
-{         
-PORTC = gCalValue0; 
-gDutyOff++;
-if( gDutyOff >11) gCurState = 8;       
-}
-else if( gCurState == 8 )
-{            
-gDutyOff = 0; 
-PORTC = gCalValue1;               
-gCurState = 9;      
-} 
-else if( gCurState == 9 )
-{         
-PORTC = gCalValue0; 
-gDutyOff++;
-if( gDutyOff >11) gCurState = 10;       
-}
-else if( gCurState == 10 )
-{            
-gDutyOff = 0; 
-PORTC = gCalValue1;               
-gCurState = 11;      
-}  
-else if( gCurState == 11 )
-{    
-gDutyOff++;
-if( gDutyOff >294)     
-{    
-gCurState = 0;
-gElLoc++;   
-if( gElLoc > 3 )
-{     
-PORTC = 0x00; 
-gElLoc = 0;
-gElCompletFlag = 1;
-}
-}        
-}
-}    
-}
-
-void PulseGenerator5( void )
+void PulseGenerator( void )
 {
 int i=0;
 
-TCNT1H=0xC1;
-TCNT1L=0x80;     
+TCNT1H=0xE0;    
+TCNT1L=0xC0;     
 
 if( gRunFlag==1 && gElCompletFlag == 0 )
-{ 
+{     
+
+if( gGenMode==0 )
+{  
+if(gShotWaitTime<=800)  
+{
+gShotWaitTime++;
+}          
+else
+{
 if( gCurState == 0 )
 {                
-
 gCalValue0 = gElMatrix[gElLoc]<<4;
 gCalValue1 = 0; 
 
@@ -744,25 +475,104 @@ gCurState = 5;
 }                    
 else if( gCurState == 5 )
 {              
-gDutyOff = 0;
-PORTC = gCalValue1;         
-gCurState = 6;        
-}                                     
-else if( gCurState == 6 )
-{    
-gDutyOff++;
-if( gDutyOff >8)  
-{ 
-gCurState = 0;
-gElLoc++;   
+PORTC = gCalValue1;
+gElLoc++;          
 if( gElLoc > 3 )
 {  
-PORTC = 0;
-gElLoc = 0;
+gShotCnt++;                   
+gElLoc = 0;          
+}         
+gCurState = 0;                     
+
+if(gShotCnt >=1)      
+{   
+gShotCnt = 0;
+gShotWaitTime = 0;
 gElCompletFlag = 1;
+}                                 
+}   
+}       
 }
-}        
+else
+{     
+
+if(gShotWaitTime<=400)  
+{
+gShotWaitTime++;   
+gShotGapWaitTime = 0;
+}          
+else
+{      
+if(gShotGapWaitTime)
+{   
+gShotGapWaitTime --;
 }
+else
+{   
+if( gCurState == 0 )
+{                
+gCalValue0 = gElMatrix[gElLoc]<<4;
+gCalValue1 = 0; 
+
+for( i=0; i< 4; i++)
+{
+if( gElMatrix[gElLoc]&(0x08>>i)) 
+break;  
+}                                  
+gShift = i;  
+
+gShift++; 
+if( gShift > 3 ) gShift = 0;  
+
+PORTC = gCalValue0|(0x08>>gShift);   
+gCurState = 1;  
+}      
+else if( gCurState == 1 )
+{
+PORTC = gCalValue1;             
+gCurState = 2;
+}                        
+else if( gCurState == 2 )
+{  
+gShift++;
+if( gShift > 3 ) gShift = 0;
+PORTC = gCalValue0|(0x08>>gShift);         
+gCurState = 3;       
+}
+else if( gCurState == 3 )
+{
+PORTC = gCalValue1;               
+gCurState = 4;      
+}
+else if( gCurState == 4 )
+{
+gShift++;
+if( gShift > 3 ) gShift = 0;
+PORTC = gCalValue0|(0x08>>gShift);               
+gCurState = 5;         
+}                    
+else if( gCurState == 5 )
+{              
+PORTC = gCalValue1;
+gElLoc++;   
+gCurState = 0;  
+gShotGapWaitTime = 200;  
+if( gElLoc > 3 )
+{  
+gShotCnt++;                   
+gElLoc = 0; 
+}     
+
+if(gShotCnt >=1)      
+{   
+gShotCnt = 0;
+gShotWaitTime = 0;
+gElCompletFlag = 1;
+}                                 
+}
+}
+} 
+}      
 }
 }
 
@@ -862,9 +672,16 @@ gElCompletFlag = 1;
 
 interrupt [15] void timer1_ovf_isr(void)
 {
-if( gGenMode==0 ) 
-PulseGenerator5(); 
-else PulseGenerator6();
+PulseGenerator();   
+
+if(gSetVolagteInitTime>0)
+{     
+gSetVolagteInitTime--;
+} 
+else
+{   
+gSetVolagteInitTime =0;
+}
 }
 
 void PortInit( void )
@@ -897,8 +714,8 @@ OCR0=0x00;
 
 TCCR1A=0x00;
 TCCR1B=0x01;
-TCNT1H=0xC1;
-TCNT1L=0x80;
+TCNT1H=0xE0;
+TCNT1L=0xC0;  
 ICR1H=0x00;
 ICR1L=0x00;
 OCR1AH=0x00;
@@ -962,23 +779,6 @@ InitSettingData();
 
 gGenMode = PINB.0?1:0;
 
-if( gGenMode==1 ) 
-{         
-PORTA.5 = 1;  
-
-gElMatrix[0] = 0x0C;
-gElMatrix[1] = 0x0A;
-gElMatrix[2] = 0x09;
-gElMatrix[3] = 0x0A;    
-
-TCCR1A=0x00;
-TCCR1B=0x01;
-TCNT1H=0xE7;
-TCNT1L=0x00;
-}
-else
-{
-
 PORTA.4 = 1; 
 
 gElMatrix[0] = 0x02;
@@ -988,10 +788,9 @@ gElMatrix[3] = 0x04;
 
 TCCR1A=0x00;
 TCCR1B=0x01;
-TCNT1H=0xC1;
-TCNT1L=0x80;
 
-}                
+TCNT1H=0xE0;
+TCNT1L=0xC0;   
 }                                                  
 
 BYTE WaitEvent( void )
@@ -1009,9 +808,9 @@ else if( IPC_Get_RxCount1() >=  sizeof( IPC_HEADER ) )
 goldTime1ms = gTime1ms;
 return 2;
 }
+
 else if( (gTime1ms-goldTime1ms) > 300 ) 
 { 
-
 goldTime1ms = gTime1ms;
 
 return 3;
@@ -1107,7 +906,7 @@ gError &= ~(1<<ERROR_HEATSINK);
 else if( gAdcLoc == 1 )
 {
 if( gMode == MODE_READY && gFlag == FLAG_VOLADJ )
-{           
+{        
 
 if( gVoltage> 50 )
 {       
@@ -1197,15 +996,7 @@ gCurMode =  CUR_ERROR;
 } 
 }
 }
-}    
-
-if( PIND.4 )
-{                   
-PORTC = 0x00; 
-gError |= (1<<ERROR_VOL); 
-gCurMode =  CUR_ERROR;   
 }
-
 }
 else
 {
@@ -1322,7 +1113,18 @@ if( ++mTimeUart1 > 7 )
 mTimeUart1 = 0;  
 gError |= (1<<ERROR_NOTLCD); 
 gCurMode = CUR_ERROR;
-}            
+}    
+
+if(!gSetVolagteInitTime &&  gRunFlag==0)
+{ 
+if( PIND.4 )
+{                   
+PORTC = 0x00; 
+gError |= (1<<ERROR_VOL); 
+gCurMode =  CUR_ERROR;   
+}  
+}
+
 }    
 }      
 }
